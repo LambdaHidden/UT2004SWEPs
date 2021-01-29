@@ -1,0 +1,11 @@
+ENT.Type = "anim"
+ENT.PrintName = "Health Pack +20"
+ENT.Base = "ut2004_health_base"
+ENT.Category = "Unreal Tournament 2004"
+ENT.Author = "Upset & Hidden"
+ENT.Contact = ""
+ENT.Purpose = ""
+ENT.Instructions = ""
+ENT.Spawnable = true
+ENT.AdminOnly = true
+ENT.AdminSpawnable = true

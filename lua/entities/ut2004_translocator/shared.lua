@@ -1,0 +1,126 @@
+if SERVER then
+	AddCSLuaFile("shared.lua")
+end
+
+ENT.Type			= "anim"
+ENT.PrintName		= "UT2004 Translocator"
+ENT.Author			= "Upset"
+ENT.Contact			= ""
+ENT.Purpose			= ""
+ENT.Instructions	= ""
+
+if SERVER then
+
+function ENT:Initialize()
+	self:SetModel("models/ut2004/projectiles/translocator_puck.mdl")
+	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
+	self:PhysicsInitSphere(4.5, "metal_bouncy")
+	--self:PhysicsInit(SOLID_OBB_YAW)
+	--self:PhysicsInitBox(Vector(-4, -4, -0.5), Vector(4, 4, 2))
+	--self:SetSolid(SOLID_VPHYSICS)
+	--self:SetMoveType(MOVETYPE_VPHYSICS)
+	
+	local phys = self:GetPhysicsObject()
+	if (phys:IsValid()) then
+		phys:Wake()
+		--phys:SetMaterial("metal_bouncy")
+		--phys:SetDamping(0, 128)
+		phys:EnableDrag(false)
+	end
+	
+	self:SetHealth(50)
+	
+	util.SpriteTrail( self, 0, self.Owner:GetPlayerColor():ToColor(), false, 32, 16, 1.5, 0.125, "trails/laser.vmt" )
+	--util.SpriteTrail( self, 0, Color( 128, 128, 255 ), false, 12, 10, 1, 0.125, "trails/laser.vmt" )
+
+	--self.sound = CreateSound(self, "ut2004/weaponsounds/BTranslocatorHoverModule.wav")
+	self.sound = CreateSound(self, "ut2004/weaponsounds/redeemer_flight.wav")
+	self.sound:SetSoundLevel(60)
+	self.sound:Play()
+	self.sound:ChangePitch( 200 )
+end
+
+function ENT:OnRemove()
+	if self.sound then self.sound:Stop() end
+end
+/*
+function ENT:PhysicsUpdate(phys)
+	if !IsValid(phys) then return end -- Until i can figure out how to not nullify the puck's velocity, this function will have to stay commented.
+	
+	if IsValid(self.Owner) and self.Owner:GetViewEntity() == self then
+		self:SetAngles(self.Owner:EyeAngles())
+		--print(self:GetVelocity(), phys:GetVelocity())
+	else
+		self:SetAngles(Angle(0,0,0))
+	end
+	
+end
+*/
+function ENT:PhysicsCollide(data,phys)
+	if data.Speed > 256 then
+		self:EmitSound("ut2004/weaponsounds/BGrenfloor1.wav")
+	end
+	
+	local LastSpeed = math.max( data.OurOldVelocity:Length(), data.Speed )
+	if data.Speed > 128 then
+		local NewVelocity = phys:GetVelocity()
+		NewVelocity:Normalize()
+
+		LastSpeed = math.max( NewVelocity:Length(), LastSpeed )
+
+		local TargetVelocity = NewVelocity * LastSpeed * 0.5
+
+		phys:SetVelocity( TargetVelocity )
+	else
+		phys:SetVelocity(Vector(0,0,0))
+	end
+end
+
+function ENT:Think()	
+	if IsValid(self.Owner) and self.Owner:Alive() and self.Owner:GetPos():DistToSqr(self:GetPos()) < 400 and self.Owner:Crouching() and self:GetVelocity():Length() < 20 then
+		--self.Owner:EmitSound("items/ut99/AmmoPick.wav")
+		self.Owner:SetViewEntity(self.Owner)
+		self:Remove()
+	end
+end
+
+function ENT:OnTakeDamage(dmginfo)
+	
+	self:SetHealth(self:Health() - dmginfo:GetDamage())
+	if self:Health() < 0 then
+		self.sound:Stop()
+	end
+	local phys = self:GetPhysicsObject()
+	local force = dmginfo:GetDamageForce() *0.125
+	force[3] = force[3] * -2
+	if phys:IsValid() then
+		phys:ApplyForceCenter(force)
+	end
+end
+
+end
+
+hook.Add("PostPlayerDraw", "UTTeleGlow", function(ply)
+	local iIndex = ply:EntIndex()
+	hook.Add("RenderScreenspaceEffects", "UTTeleGlowOverlay" .. iIndex, function()
+		if IsValid(ply) and ply:GetNWBool("Teleported") then
+			cam.Start3D(EyePos(), EyeAngles())
+				if util.IsValidModel(ply:GetModel()) then
+					local mat = Material("ut2004/effects/PlayerTeleOverlay")
+					mat:SetVector( "$color2", ply:GetPlayerColor() )
+					render.MaterialOverride(mat) --Temporary
+					ply:DrawModel()
+					render.MaterialOverride(0)
+				end
+			cam.End3D()
+		end
+	end)
+end)
+
+if CLIENT then
+
+function ENT:Draw()
+	self:DrawModel()
+end
+
+end

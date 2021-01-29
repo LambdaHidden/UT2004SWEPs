@@ -1,0 +1,10 @@
+ENT.Type = "anim"
+ENT.PrintName = "Shield"
+ENT.Base = "ut2004_armor_base"
+ENT.Category = "Unreal Tournament 2004"
+ENT.Author = "Upset"
+ENT.Contact = ""
+ENT.Purpose = ""
+ENT.Instructions = ""
+ENT.Spawnable = true
+ENT.AdminOnly = true
