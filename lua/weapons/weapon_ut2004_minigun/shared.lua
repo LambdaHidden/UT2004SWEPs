@@ -142,7 +142,9 @@ function SWEP:SpecialThink()
 		self:SetAttackDelay(math.Clamp(attdelay-0.1, 2, self.BarrelAccelTime))
 	end
 	--self:CallOnClient("UpdateBonePositions", "nil")
-	self:UpdateBonePositions(self.Owner:GetViewModel())
+	if CLIENT then
+		self:UpdateBonePositions(self.Owner:GetViewModel())
+	end
 end
 
 function SWEP:OnRemove()
