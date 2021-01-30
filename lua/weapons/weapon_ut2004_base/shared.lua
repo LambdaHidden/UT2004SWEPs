@@ -397,11 +397,16 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 end
 
 function SWEP:ResetBonePositions()
-	if !IsValid(self) then return end
-	local vm = self.Owner:GetViewModel()
-	if (!vm:GetBoneCount()) then return end
+	if !self:IsValid() then return end
+	
+	local owner = self:GetOwner()
+	if !owner:IsValid() then return end
+	
+	local vm = owner:GetViewModel()
+	if !vm:IsValid() then return end
+	
 	--vm:SetupBones()
-	for i=0, vm:GetBoneCount() do
+	for i=0, (vm:GetBoneCount() or 0) - 1 do
 		vm:ManipulateBoneScale( i, Vector(1, 1, 1) )
 		vm:ManipulateBoneAngles( i, Angle(0, 0, 0) )
 		vm:ManipulateBonePosition( i, Vector(0, 0, 0) )
