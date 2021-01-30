@@ -43,7 +43,7 @@ function SWEP:PrimaryAttack()
 	timer.Simple(self:SequenceDuration(), function()
 		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
-			self:WeaponSound(self.Primary.Special)
+			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 		end
 	end)
 	self:WeaponSound(self.Primary.Sound)
@@ -64,7 +64,7 @@ function SWEP:SecondaryAttack()
 		timer.Simple(self:SequenceDuration(), function()
 			if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
 				self:SendWeaponAnim(ACT_VM_DEPLOY_1)
-				self:WeaponSound(self.Primary.Special)
+				self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			end
 		end)
 		return
@@ -76,7 +76,8 @@ function SWEP:SecondaryAttack()
 	self:WeaponSound("UT2004_RL.Open")
 	timer.Simple(self:SequenceDuration(), function()
 		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
-			self:WeaponSound(self.Primary.Special)
+			--self:EmitSound(self.Primary.Special, 100, 100, 1, CHAN_ITEM)
+			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
 		end
 	end)
@@ -145,7 +146,7 @@ function SWEP:AttackStuff2()
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	timer.Simple(self:SequenceDuration(), function()
 		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
-			self:WeaponSound(self.Primary.Special)
+			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
 		end
 	end)
