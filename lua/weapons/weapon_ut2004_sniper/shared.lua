@@ -74,7 +74,7 @@ function SWEP:PrimaryAttack()
 	self:Muzzleflash()
 	local anim = {ACT_VM_RECOIL1, ACT_VM_RECOIL2, ACT_VM_RECOIL3}
 	if !self:GetZoom() then self:SendWeaponAnim(anim[math.random(1,3)]) end
-	self:EmitSound(self.Primary.Sound, 100, 100, 1, CHAN_ITEM)
+	self:WeaponSoundSound(self.Primary.Sound, CHAN_ITEM)
 	self:UDSound()
 	self:ShootBullet( self.Primary.Damage, self.Primary.Recoil, self.Primary.NumShots, self.Primary.Cone )
 	--self:UTRecoil()
