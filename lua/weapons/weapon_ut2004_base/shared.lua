@@ -177,9 +177,10 @@ function SWEP:OnDrop()
 	self:OnRemove()
 end
 
-function SWEP:WeaponSound(snd)
+function SWEP:WeaponSound(snd, chan)
 	if game.SinglePlayer() and SERVER or !game.SinglePlayer() then
-		self:EmitSound(snd, 100, 100, 1, CHAN_AUTO)
+		
+		self:EmitSound(snd, 100, 100, 1, chan or CHAN_AUTO)
 	end
 	self:DisableHolster()
 end
