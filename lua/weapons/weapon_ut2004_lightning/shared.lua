@@ -79,7 +79,7 @@ function SWEP:PrimaryAttack()
 	
 	local hitpos = self.Owner:GetEyeTrace().HitPos
 	
-	self:EmitSound(self.Primary.Sound, 100, 100, 1, CHAN_ITEM)
+	self:WeaponSoundSound(self.Primary.Sound, CHAN_ITEM)
 	self:WeaponSound("ut2004/weaponsounds/LightningGunChargeUp.wav")
 	EmitSound( "ut2004/weaponsounds/BLightningGunImpact.wav", hitpos, self:EntIndex() )
 	self:UDSound()
