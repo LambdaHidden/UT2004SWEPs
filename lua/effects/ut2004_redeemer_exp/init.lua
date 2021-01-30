@@ -1,4 +1,4 @@
-EFFECT.Mat1 = Material("ut2004/effects/FlameGradient.vmt")
+EFFECT.Mat1 = "ut2004/effects/FlameGradient.vmt"
 function EFFECT:Init(data)
 	self.Pos = data:GetOrigin()
 	/*
@@ -39,7 +39,7 @@ function EFFECT:Render()
 	--render.MaterialOverride(self.Mat1)
 	--render.SetMaterial( self.Mat1 )
 	--self:DrawModel()
-	render.SetMaterial(self.Mat1)
+	render.SetMaterial(Material(self.Mat1))
 	self:SetRenderAngles( Angle(0,0,0) )
 	render.DrawSphere( self:GetPos(), self.Size*16, 16, 8, Color( 255,255,255,col ) )
 	self:SetRenderAngles( Angle(0,90,0) )
