@@ -221,12 +221,12 @@ function SWEP:SpecialThink()
 			else
 				ent:SetRenderAngles(Angle(0,0,0))
 		end
+		self:UpdateBonePositions(self.Owner:GetViewModel())
 	end
 	
 	if self.Owner:KeyPressed(IN_ZOOM) then
 		self:TogglePuckCamera()
 	end
-	self:UpdateBonePositions(self.Owner:GetViewModel())
 end
 
 local lastpos = 0
