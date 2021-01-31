@@ -27,27 +27,27 @@ function SWEP:PrimaryAttack()
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:SetIdleDelay(CurTime() + 0.5)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	--self:UTRecoil()
 	self:DisableHolster()
 	self:TakeAmmo()
 	self:EmitSound(self.Primary.Sound, 75, 100, 0.4)
 	if SERVER then
-		self.Owner:LagCompensation(true)
+		self:GetOwner():LagCompensation(true)
 	end
 	self:UDSound()
 	
-	local ang = self.Owner:EyeAngles()
-	local pos = self.Owner:GetShootPos()
-	pos = pos +ang:Right() *6 -ang:Up() *4 + self.Owner:GetAimVector() * 16
-	--local endpos = self.Owner:GetEyeTrace().HitPos
-	--local dist = endpos:Distance(self.Owner:GetShootPos())*1.25
+	local ang = self:GetOwner():EyeAngles()
+	local pos = self:GetOwner():GetShootPos()
+	pos = pos +ang:Right() *6 -ang:Up() *4 + self:GetOwner():GetAimVector() * 16
+	--local endpos = self:GetOwner():GetEyeTrace().HitPos
+	--local dist = endpos:Distance(self:GetOwner():GetShootPos())*1.25
 	--dist = math.min(dist, 20000)
 
 	local tr = util.TraceLine({
 		start = pos,
-		endpos = self.Owner:GetEyeTrace().HitPos + self.Owner:GetAimVector()*16,
-		filter = self.Owner
+		endpos = self:GetOwner():GetEyeTrace().HitPos + self:GetOwner():GetAimVector()*16,
+		filter = self:GetOwner()
 	})
 
 	local ef = EffectData()
@@ -55,8 +55,8 @@ function SWEP:PrimaryAttack()
 		ef:SetAttachment(1)
 		ef:SetOrigin(tr.HitPos)
 		ef:SetEntity(self)
-		--ef:SetAngles(self.Owner:EyeAngles())
-		--ef:SetNormal(self.Owner:GetAimVector())
+		--ef:SetAngles(self:GetOwner():EyeAngles())
+		--ef:SetNormal(self:GetOwner():GetAimVector())
 		ef:SetFlags(self.EffectSkin)
 		util.Effect("ut2004_shock_beam", ef)
 		util.Effect(self.MuzzleName, ef)
@@ -66,7 +66,7 @@ function SWEP:PrimaryAttack()
 	self:DoDamage(tr)
 	
 	if SERVER then
-		self.Owner:LagCompensation(false)
+		self:GetOwner():LagCompensation(false)
 	end
 end
 
@@ -89,9 +89,9 @@ function SWEP:DoDamage(tr)
 		local dmginfo = DamageInfo()
 		dmginfo:SetDamage(self.Primary.Damage)
 		dmginfo:SetDamageType(DMG_SHOCK)
-		dmginfo:SetAttacker(self.Owner)
+		dmginfo:SetAttacker(self:GetOwner())
 		dmginfo:SetInflictor(self)
-		dmginfo:SetDamageForce(self.Owner:GetUp() * 3500 + self.Owner:GetForward() * 30000)
+		dmginfo:SetDamageForce(self:GetOwner():GetUp() * 3500 + self:GetOwner():GetForward() * 30000)
 		dmginfo:SetDamagePosition(tr.HitPos)
 		tr.Entity:TakeDamageInfo(dmginfo)
 	end
@@ -103,12 +103,12 @@ function SWEP:SecondaryAttack()
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
 	self:SetIdleDelay(CurTime() + 0.5)
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	--self:UTRecoil()
 	
 	local flash2 = EffectData()
-		flash2:SetOrigin(self.Owner:GetEyeTrace().HitPos)
-		flash2:SetEntity(self.Owner)
+		flash2:SetOrigin(self:GetOwner():GetEyeTrace().HitPos)
+		flash2:SetEntity(self:GetOwner())
 		util.Effect("ut2004_mflash_shock2", flash2)
 	
 	self:TakeAmmo()
@@ -116,13 +116,13 @@ function SWEP:SecondaryAttack()
 	self:UDSound()
 	self:DisableHolster()
 	if SERVER then
-		local pos = self.Owner:GetShootPos()
-		local ang = self.Owner:GetAimVector():Angle()
+		local pos = self:GetOwner():GetShootPos()
+		local ang = self:GetOwner():GetAimVector():Angle()
 		pos = pos + ang:Right()*4 - ang:Up()*4
 		local ent = ents.Create("ut2004_shockcore")
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
-		ent:SetOwner(self.Owner)
+		ent:SetOwner(self:GetOwner())
 		ent:Spawn()
 		ent:Activate()
 		local phys = ent:GetPhysicsObject()
