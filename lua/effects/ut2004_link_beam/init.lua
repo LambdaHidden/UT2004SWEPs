@@ -15,6 +15,7 @@ function EFFECT:Init(data)
 end
 
 function EFFECT:Think()
+	if !IsValid(self.Particle) then return end
 	if IsValid(self.Wep.Link) then
 		self.Particle:SetControlPointEntity(1, self.Wep.Link)
 	else
