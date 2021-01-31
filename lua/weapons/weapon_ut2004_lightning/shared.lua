@@ -47,7 +47,7 @@ if CLIENT then
 			
 			surface.SetDrawColor(128*clamp, 255 * clamp1, 128*clamp, 255)
 			surface.DrawRect(ScrW()-100, y+230 - (300*clamp1), 40 , 300 * clamp1)
-			--draw.SimpleText("X"..math.Round(-self.Owner:GetFOV() / self.Owner:GetInfoNum("fov_desired", 90) *8.1 +9.1, 1), "UT99SniperFont", x + 128, y + 180, Color(0,200,0,255), TEXT_ALIGN_LEFT)
+			--draw.SimpleText("X"..math.Round(-self:GetOwner():GetFOV() / self:GetOwner():GetInfoNum("fov_desired", 90) *8.1 +9.1, 1), "UT99SniperFont", x + 128, y + 180, Color(0,200,0,255), TEXT_ALIGN_LEFT)
 			--draw.SimpleText("X"..math.Round((-self:GetZoomTime()+1.115)*8.15, 1), "UT99SniperFont", x + 128, y + 180, Color(0,200,0,255), TEXT_ALIGN_LEFT)
 		end
 	end
@@ -61,7 +61,7 @@ function SWEP:SpecialDT()
 end
 
 function SWEP:SpecialDeploy()
-	ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self.Owner:GetViewModel(), 2 )
+	ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self:GetOwner():GetViewModel(), 2 )
 end
 
 function SWEP:OnRemove()
@@ -77,15 +77,15 @@ function SWEP:PrimaryAttack()
 	self:Muzzleflash()
 	if !self:GetZoom() then self:SendWeaponAnim(ACT_VM_PRIMARYATTACK) end
 	
-	local hitpos = self.Owner:GetEyeTrace().HitPos
+	local hitpos = self:GetOwner():GetEyeTrace().HitPos
 	
 	self:WeaponSound(self.Primary.Sound, CHAN_ITEM)
 	self:WeaponSound("ut2004/weaponsounds/LightningGunChargeUp.wav")
 	EmitSound( "ut2004/weaponsounds/BLightningGunImpact.wav", hitpos, self:EntIndex() )
 	self:UDSound()
 	
-	util.ParticleTracerEx( "ut2004_lightning", self.Owner:GetShootPos(), hitpos, false, self:EntIndex(), 1 )
-	ParticleEffect( "ut2004_lightning_sparks", hitpos, self.Owner:GetEyeTrace().HitNormal:Angle() )
+	util.ParticleTracerEx( "ut2004_lightning", self:GetOwner():GetShootPos(), hitpos, false, self:EntIndex(), 1 )
+	ParticleEffect( "ut2004_lightning_sparks", hitpos, self:GetOwner():GetEyeTrace().HitNormal:Angle() )
 	
 	self:ShootBullet( self.Primary.Damage, self.Primary.Recoil, self.Primary.NumShots, self.Primary.Cone, 0 )
 	--self:UTRecoil()
@@ -99,17 +99,17 @@ function SWEP:SecondaryAttack()
 		self:SetZoom(true)
 		self:SetZoomTime(1)
 		if game.SinglePlayer() and SERVER or CLIENT then
-			self.Owner:DrawViewModel(false)
+			self:GetOwner():DrawViewModel(false)
 		end
-		self.Owner:GetViewModel():StopParticles()
+		self:GetOwner():GetViewModel():StopParticles()
 		self:SetZoomStart(CurTime())
 	else 
 		self:SetZoom(false)
 		self:SetZoomTime(1)
 		if game.SinglePlayer() and SERVER or CLIENT then
-			self.Owner:DrawViewModel(true)
+			self:GetOwner():DrawViewModel(true)
 		end
-		ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self.Owner:GetViewModel(), 2 )
+		ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self:GetOwner():GetViewModel(), 2 )
 		self:EmitSound("ut2004/weaponsounds/BZoomOut1.wav", 50)
 	end	
 end
@@ -119,7 +119,7 @@ function SWEP:SpecialThink()
 		local ct = CurTime()
 		self:SetZoomTime(math.max(1-(ct - self:GetZoomStart()), 0))
 		self:EmitSound("ut2004/weaponsounds/BZoomIn1.wav", 50)
-		if self.Owner:KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
+		if self:GetOwner():KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
 			self:SetZoomStart(0)
 		end
 	end
@@ -135,7 +135,7 @@ end
 
 function SWEP:AdjustMouseSensitivity()
 	if self:GetZoom() then
-		return self.Owner:GetFOV() / self.Owner:GetInfoNum("fov_desired", 90)
+		return self:GetOwner():GetFOV() / self:GetOwner():GetInfoNum("fov_desired", 90)
 	end
 end
 
