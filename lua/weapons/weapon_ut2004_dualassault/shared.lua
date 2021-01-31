@@ -40,7 +40,7 @@ function SWEP:Deploy()
 	self:PlayDeploySound()
 	self:SetIdleDelay(CurTime() +.3)
 
-	local vm = self.Owner:GetViewModel( 1 )
+	local vm = self:GetOwner():GetViewModel( 1 )
 	vm:SetWeaponModel( self.ViewModel, self )
 
 	self:SendWeaponAnim(ACT_VM_DRAW)
@@ -58,7 +58,7 @@ function SWEP:OnRemove()
 end
 
 function SWEP:Equip()
-	self.Owner:StripWeapon("weapon_ut2004_assault")
+	self:GetOwner():StripWeapon("weapon_ut2004_assault")
 end
 
 function SWEP:SpecialHolster(wep)
@@ -68,8 +68,8 @@ end
 function SWEP:Grenade(force)	
 	if CLIENT then return end
 	local ent = ents.Create("ut2004_grenade")
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:GetAimVector():Angle()
+	local pos = self:GetOwner():GetShootPos()
+	local ang = self:GetOwner():GetAimVector():Angle()
 	
 	if self.UsedLeft then
 		pos = pos +ang:Right() *-7 +ang:Up() *-8
@@ -78,8 +78,8 @@ function SWEP:Grenade(force)
 	end
 	
 	ent:SetPos(pos)
-	ent:SetAngles(self.Owner:EyeAngles())
-	ent:SetOwner(self.Owner)
+	ent:SetAngles(self:GetOwner():EyeAngles())
+	ent:SetOwner(self:GetOwner())
 	ent:SetExplodeDelay(3)
 	ent:Spawn()
 	ent:Activate()
@@ -108,7 +108,7 @@ end
 
 function SWEP:SpecialThink()
 
-	if self.Owner:KeyReleased(IN_ATTACK2) and self.ShouldFireGrenade then
+	if self:GetOwner():KeyReleased(IN_ATTACK2) and self.ShouldFireGrenade then
 		self.ShouldFireGrenade = false
 		self:AttackStuff2()
 		self.GrenadeForce = 700
@@ -128,7 +128,7 @@ function SWEP:AttackStuff()
 	
 	if self.UsedLeft then
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-		self.Owner:SetAnimation(PLAYER_ATTACK1)
+		self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 		self.UsedLeft = false
 	else
 		self:SendSecondWeaponAnim(ACT_VM_PRIMARYATTACK)
@@ -141,7 +141,7 @@ end
 function SWEP:AttackStuff2()	
 	self:Muzzleflash()
 	self:TakeAmmo2()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 	
 	self:SetNextPrimaryFire(CurTime() + 1)
