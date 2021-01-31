@@ -31,7 +31,7 @@ function SWEP:SpecialInit()
 end
 
 function SWEP:Equip()
-	self.Owner:GiveAmmo(100, self.Primary.Ammo)
+	self:GetOwner():GiveAmmo(100, self.Primary.Ammo)
 end
 
 function SWEP:SpecialDeploy()
@@ -41,7 +41,7 @@ end
 
 function SWEP:PrimarySoundStart()
 	if !self.LoopSound then
-		self.LoopSound = CreateSound(self.Owner, self.Primary.Sound)
+		self.LoopSound = CreateSound(self:GetOwner(), self.Primary.Sound)
 	end
 	if self.LoopSound and !self.LoopSound:IsPlaying() then
 		self.LoopSound:Play()
@@ -49,7 +49,7 @@ function SWEP:PrimarySoundStart()
 end
 function SWEP:SecondarySoundStart()
 	if !self.LoopSound1 then
-		self.LoopSound1 = CreateSound(self.Owner, self.Secondary.Sound)
+		self.LoopSound1 = CreateSound(self:GetOwner(), self.Secondary.Sound)
 	end
 	if self.LoopSound1 and !self.LoopSound1:IsPlaying() then
 		self.LoopSound1:Play()
@@ -57,7 +57,7 @@ function SWEP:SecondarySoundStart()
 end
 function SWEP:EmptySoundStart()
 	if !self.LoopSound2 then
-		self.LoopSound2 = CreateSound(self.Owner, self.Primary.Special)
+		self.LoopSound2 = CreateSound(self:GetOwner(), self.Primary.Special)
 	end
 	if self.LoopSound2 and !self.LoopSound2:IsPlaying() then
 		self.LoopSound2:Play()
@@ -120,7 +120,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:SpecialThink()
-	if (self.Owner:KeyReleased(IN_ATTACK) || self.Owner:KeyReleased(IN_ATTACK2)) or self:Ammo1() <= 0 then
+	if (self:GetOwner():KeyReleased(IN_ATTACK) || self:GetOwner():KeyReleased(IN_ATTACK2)) or self:Ammo1() <= 0 then
 		if self:GetAttack() then
 			--self:EmitSound(self.Primary.Special1, 75, 100, 1, CHAN_ITEM)
 			if self:GetAttackDelay() >= self.BarrelAccelTime then
@@ -136,21 +136,21 @@ function SWEP:SpecialThink()
 	end
 	
 	local attdelay = self:GetAttackDelay()
-	if (self.Owner:KeyDown(IN_ATTACK) || self.Owner:KeyDown(IN_ATTACK2)) and self:Ammo1() > 0 then
+	if (self:GetOwner():KeyDown(IN_ATTACK) || self:GetOwner():KeyDown(IN_ATTACK2)) and self:Ammo1() > 0 then
 		self:SetAttackDelay(math.Clamp(attdelay+0.1, 2, self.BarrelAccelTime))
 	else
 		self:SetAttackDelay(math.Clamp(attdelay-0.1, 2, self.BarrelAccelTime))
 	end
 	--self:CallOnClient("UpdateBonePositions", "nil")
 	if CLIENT then
-		self:UpdateBonePositions(self.Owner:GetViewModel())
+		self:UpdateBonePositions(self:GetOwner():GetViewModel())
 	end
 end
 
 function SWEP:OnRemove()
 	if self.LoopSound then self.LoopSound:Stop() end
 	self:SetAttack(nil)
-	local owner = self.Owner
+	local owner = self:GetOwner()
 	if IsValid(self) and IsValid(owner) and owner:IsPlayer() then
 		if game.SinglePlayer() and CLIENT then
 			self:ResetBonePositions()
@@ -168,14 +168,14 @@ local lastpos = 0
 local gunpos = Vector()
 
 function SWEP:UpdateBonePositions(vm1)
-	local vm = vm1 or self.Owner:GetViewModel()
+	local vm = vm1 or self:GetOwner():GetViewModel()
 	--print(vm)
 	local barrels = vm:LookupBone("Bone Barrels")
 	local gear = vm:LookupBone("Bone gear")
 	--print(barrels, gear)
 	if !barrels or !gear then return end
 	local speed = 7
-	if self.Owner:KeyDown(IN_ATTACK2) then
+	if self:GetOwner():KeyDown(IN_ATTACK2) then
 		speed = 5
 	end
 	local attack = lastpos+self:GetAttackDelay()-2
@@ -188,7 +188,7 @@ end
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
 	self:TakeAmmo()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
 
