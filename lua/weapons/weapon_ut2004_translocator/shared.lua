@@ -46,22 +46,24 @@ function SWEP:PrimaryAttack()
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
 	if CLIENT then return end
 	
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:EyeAngles()
+	local own = self:GetOwner()
+	
+	local pos = own:GetShootPos()
+	local ang = own:EyeAngles()
 	pos = pos + ang:Up() *-8 + ang:Right() * 8
 		
 	if !self:GetAttack() then
 		
 		self:SetNextPrimaryFire( CurTime() + .8 )
-		self.Owner:SetAnimation( PLAYER_ATTACK1 )
+		own:SetAnimation( PLAYER_ATTACK1 )
 		self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
-		self.Owner:EmitSound(self.Primary.Sound, 100, 100)
+		own:EmitSound(self.Primary.Sound, 100, 100)
 		self:SetIdleDelay(CurTime() +.2)
 		
 		local entTele = ents.Create("ut2004_translocator")
 		entTele:SetAngles(Angle(0,ang.y,0))
 		entTele:SetPos(pos)
-		entTele:SetOwner(self.Owner)
+		entTele:SetOwner(own)
 		entTele:Spawn()
 		entTele:Activate()
 		local phys = entTele:GetPhysicsObject()
@@ -69,16 +71,16 @@ function SWEP:PrimaryAttack()
 			phys:SetVelocity(ang:Forward() *1170)
 		end
 		--self.entTele = entTele
-		self:SetNWEntity("entTele", entTele)
+		own:SetNWEntity("entTele", entTele)
 		timer.Simple(.1, function() self:SetAttack(true) end)
 	else
-		local ent = self:GetNWEntity("entTele")
+		local ent = own:GetNWEntity("entTele")
 		--BSeekLost1
 		self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 		self:SetIdleDelay(CurTime() +.4)
 		
-		if IsValid(ent) and ent:Health() < 1 then self:EmitSound("ut2004/weaponsounds/BSeekLost1.wav") return end
+		if IsValid(ent) and ent:Health() < 1 then self:WeaponSound("ut2004/weaponsounds/BSeekLost1.wav") return end
 		
 		self:SetAttack(false)
 		if self:GetZoom() then
@@ -87,15 +89,16 @@ function SWEP:PrimaryAttack()
 		if ent:IsValid() then
 			ent:Remove()
 		end
-		self.Owner:EmitSound(self.Primary.Special1, 100, 100)
+		own:EmitSound(self.Primary.Special1, 100, 100)
 	end
 end
 
 function SWEP:SecondaryAttack()
 	if CLIENT then return end
 	if !self:GetAttack() then return end
+	local own = self:GetOwner()
 	
-	local ent = self:GetNWEntity("entTele")
+	local ent = own:GetNWEntity("entTele")
 	if IsValid(ent) then
 	
 		local startpos = ent:GetPos()
@@ -103,23 +106,23 @@ function SWEP:SecondaryAttack()
 		local tr = util.TraceHull({
 			start = startpos,
 			endpos = startpos,
-			mins = self.Owner:OBBMins(),
-			maxs = self.Owner:OBBMaxs(),
+			mins = own:OBBMins(),
+			maxs = own:OBBMaxs(),
 			filter = ent
 		})
 		
 		local telepos = startpos
 
 		if tr.HitWorld then
-			local newpos = self.Owner:GetPos() - self.Owner:NearestPoint(tr.HitPos)
+			local newpos = own:GetPos() - own:NearestPoint(tr.HitPos)
 			telepos = tr.HitPos + newpos
 			--telepos[3] = startpos[3]
 			
 			tr = util.TraceHull({
 				start = telepos,
 				endpos = telepos,
-				mins = self.Owner:OBBMins(),
-				maxs = self.Owner:OBBMaxs(),
+				mins = own:OBBMins(),
+				maxs = own:OBBMaxs(),
 				filter = ent
 			})
 			
@@ -132,7 +135,7 @@ function SWEP:SecondaryAttack()
 					ent:Remove()
 				end
 				self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-				self.Owner:EmitSound(self.Primary.Special1, 100, 100)
+				own:EmitSound(self.Primary.Special1, 100, 100)
 				--self:SetIdleDelay(CurTime() +.4)
 				return
 			end
@@ -140,25 +143,25 @@ function SWEP:SecondaryAttack()
 		
 		self:CallOnClient("RenderTeleportEffects")
 		
-		if tr.HitNonWorld and tr.Entity != self.Owner then
-			tr.Entity:TakeDamage(999, self.Owner)
+		if tr.HitNonWorld and tr.Entity != own then
+			tr.Entity:TakeDamage(999, own)
 		end
 		
-		--util.ParticleTracerEx( "ut2004_trans_tracers", self.Owner:GetPos(), ent:GetPos(), false, self.Owner:EntIndex(), 1 )
+		--util.ParticleTracerEx( "ut2004_trans_tracers", own:GetPos(), ent:GetPos(), false, own:EntIndex(), 1 )
 		
-		self.Owner:SetPos(telepos)
+		own:SetPos(telepos)
 		
 		if self:GetZoom() then
 			self:TogglePuckCamera()
 		end
 
 		ent.pickup = nil
-		self:SetNWEntity("entTele", nil)
+		own:SetNWEntity("entTele", nil)
 		ent:Remove()
 		if self:GetZoom() then
 			self:TogglePuckCamera()
 		end
-		self.Owner:EmitSound(self.Primary.Special2, 100, 100)
+		own:EmitSound(self.Primary.Special2, 100, 100)
 		self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 		
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
@@ -170,7 +173,7 @@ function SWEP:SecondaryAttack()
 		self:SetIdleDelay(CurTime() +.4)
 		
 		if ent:Health() < 1 then
-			self.Owner:Kill()
+			own:Kill()
 		end
 	end
 end
@@ -180,51 +183,53 @@ function SWEP:CanHolster()
 end
 
 function SWEP:RenderTeleportEffects()
-	if !IsValid(self.Owner) then return end
-	local ent = self:GetNWEntity("entTele")
+	local own = self:GetOwner()
+	if !IsValid(own) then return end
+	local ent = own:GetNWEntity("entTele")
 	
-	local glow = CreateParticleSystem(self.Owner, "ut2004_trans_glow", PATTACH_POINT_FOLLOW, 3)
-	glow:SetControlPoint(1, self.Owner:GetPlayerColor())
+	local glow = CreateParticleSystem(own, "ut2004_trans_glow", PATTACH_POINT_FOLLOW, 3)
+	glow:SetControlPoint(1, own:GetPlayerColor())
 	glow:StartEmission()
 	
 	if !IsValid(ent) then return end
 	
-	local tracers = CreateParticleSystem(self.Owner, "ut2004_trans_tracers", PATTACH_ABSORIGIN)
-	tracers:SetControlPoint(0, self.Owner:GetPos())
+	local tracers = CreateParticleSystem(own, "ut2004_trans_tracers", PATTACH_ABSORIGIN)
+	tracers:SetControlPoint(0, own:GetPos())
 	tracers:SetControlPoint(1, ent:GetPos())
-	tracers:SetControlPoint(2, self.Owner:GetPlayerColor())
+	tracers:SetControlPoint(2, own:GetPlayerColor())
 	tracers:StartEmission()
 	
-	self.Owner:SetNWBool("Teleported", true)
+	own:SetNWBool("Teleported", true)
 	timer.Simple(1, function() 
-		if IsValid(self.Owner) and self.Owner:Alive() then
-			self.Owner:SetNWBool("Teleported", false)
+		if IsValid(own) then
+			own:SetNWBool("Teleported", false)
 		end
 	end)
 end
 
 function SWEP:SpecialThink()
-	local ent = self:GetNWEntity("entTele")
+	local own = self:GetOwner()
+	local ent = own:GetNWEntity("entTele")
 	if self:GetAttack() and ent and !IsValid(ent) then
 		self:SetAttack(false)
 		self:SendWeaponAnim(ACT_VM_IDLE)
 	end
 	
 	if SERVER and self:Ammo1() < 6 and CurTime() > self.ReturnAmmoTime then
-		self.Owner:GiveAmmo(1, self.Primary.Ammo, true)
+		own:GiveAmmo(1, self.Primary.Ammo, true)
 		self.ReturnAmmoTime = CurTime() + 1.5
 	end
 	
 	if CLIENT then
 		if IsValid(ent) and self:GetZoom() then
-				ent:SetRenderAngles(self.Owner:EyeAngles())
+				ent:SetRenderAngles(own:EyeAngles())
 			else
 				ent:SetRenderAngles(Angle(0,0,0))
 		end
-		self:UpdateBonePositions(self.Owner:GetViewModel())
+		self:UpdateBonePositions(own:GetViewModel())
 	end
 	
-	if self.Owner:KeyPressed(IN_ZOOM) then
+	if own:KeyPressed(IN_ZOOM) then
 		self:TogglePuckCamera()
 	end
 end
@@ -234,6 +239,8 @@ local gunpos = Vector()
 
 function SWEP:UpdateBonePositions(vm)
 	--if self:GetHolstering() then return end
+	--if !vm then vm = self:GetOwner():GetViewModel() end
+	
 	local puck = vm:LookupBone("Object03")
 	--print(barrels, gear)
 	if !puck then return end
@@ -250,13 +257,14 @@ function SWEP:UpdateBonePositions(vm)
 end
 
 function SWEP:TogglePuckCamera()
+	local own = self:GetOwner()
 	if SERVER then
 		if self:GetZoom() then
-			self.Owner:SetViewEntity(self.Owner)
+			own:SetViewEntity(own)
 			self:SetZoom(false)
 		else
-			if IsValid(self:GetNWEntity("entTele")) then
-				self.Owner:SetViewEntity(self:GetNWEntity("entTele"))
+			if IsValid(own:GetNWEntity("entTele")) then
+				own:SetViewEntity(own:GetNWEntity("entTele"))
 				self:SetZoom(true)
 			end
 		end
@@ -267,17 +275,17 @@ function SWEP:OnRemove()
 	if game.SinglePlayer() then
 		self:CallOnClient("ResetBonePositions")
 	else
-		if CLIENT then
+		if CLIENT and IsValid(self:GetOwner()) then
 			self:ResetBonePositions()
 		end
 	end
 	if CLIENT then return end
 		
 	local owner = self:GetOwner()
-	if owner and owner:IsValid() and owner:IsPlayer() and self:GetAttack() then
+	if owner:IsValid() and owner:IsPlayer() and self:GetAttack() then
 		self:SetAttack(false)
-		if IsValid(self:GetNWEntity("entTele")) then
-			self:GetNWEntity("entTele"):Remove()
+		if IsValid(owner:GetNWEntity("entTele")) then
+			owner:GetNWEntity("entTele"):Remove()
 		end
 		if self:GetZoom() then
 			self:TogglePuckCamera()
@@ -300,7 +308,7 @@ local static = surface.GetTextureID("vgui/ut2004/static_a")
 
 function SWEP:DrawHUD()
 	local x, y = ScrW() * 0.5, ScrH() * 0.5
-	local ent = self:GetNWEntity("entTele")
+	local ent = self:GetOwner():GetNWEntity("entTele")
 	
 	--if self:GetNWBool("DrawReticle") then
 		
