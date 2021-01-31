@@ -32,12 +32,12 @@ function SWEP:SpecialInit()
 end
 
 function SWEP:PrimaryAttack()
-	if self.Owner:KeyDown(IN_ATTACK2) then return end
+	if self:GetOwner():KeyDown(IN_ATTACK2) then return end
 	if !self:CanPrimaryAttack() then return end
 	
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
 	--self:UTRecoil()
@@ -47,13 +47,13 @@ function SWEP:PrimaryAttack()
 	self:DisableHolster()
 	self:TakeAmmo()
 	if SERVER then
-		local pos = self.Owner:GetShootPos()
-		local ang = self.Owner:GetAimVector():Angle()
+		local pos = self:GetOwner():GetShootPos()
+		local ang = self:GetOwner():GetAimVector():Angle()
 		pos = pos +ang:Forward() *10 +ang:Right() *6 +ang:Up() *-6
 		local ent = ents.Create("ut2004_bio")
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
-		ent:SetOwner(self.Owner)
+		ent:SetOwner(self:GetOwner())
 		--ent:SetModelScale(0.8, 0)
 		ent:Spawn()
 		ent:Activate()
@@ -75,7 +75,7 @@ function SWEP:SecondaryAttack()
 		self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	end
 	self.Charge = self.Charge + 0.2
-	self.ChargeSound = CreateSound(self.Owner, self.Secondary.Sound)
+	self.ChargeSound = CreateSound(self:GetOwner(), self.Secondary.Sound)
 	self.ChargeSound:Play()
 	
 	self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
@@ -84,7 +84,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:SpecialThink()
-	if self.Owner:KeyReleased(IN_ATTACK2) and self.Charge > 0 then
+	if self:GetOwner():KeyReleased(IN_ATTACK2) and self.Charge > 0 then
 		self:SecondaryRelease(self.Charge)
 	end
 end
@@ -93,7 +93,7 @@ function SWEP:SecondaryRelease()
 	self:SetNextPrimaryFire(CurTime() +self.Secondary.Delay)
 	self:SetNextSecondaryFire(CurTime() +self.Secondary.Delay)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
 	self:OnRemove()
 	self:EmitSound(self.Primary.Sound, 100, 100)
@@ -101,13 +101,13 @@ function SWEP:SecondaryRelease()
 	self:UDSound()
 	self:DisableHolster()
 	if SERVER then
-		local pos = self.Owner:GetShootPos()
-		local ang = self.Owner:GetAimVector():Angle()
+		local pos = self:GetOwner():GetShootPos()
+		local ang = self:GetOwner():GetAimVector():Angle()
 		pos = pos +ang:Right() *6 +ang:Up() *-6
 		local ent = ents.Create("ut2004_bio")
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
-		ent:SetOwner(self.Owner)
+		ent:SetOwner(self:GetOwner())
 		ent:SetModelScale(math.Clamp(self.Charge, 1, 2.2))
 		ent:Spawn()
 		ent:Activate()
