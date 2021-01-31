@@ -88,14 +88,14 @@ function SWEP:SecondaryAttack()
 		self:SetZoom(true)
 		self:SetZoomTime(1)
 		if game.SinglePlayer() and SERVER or CLIENT then
-			self.Owner:DrawViewModel(false)
+			self:GetOwner():DrawViewModel(false)
 		end
 		self:SetZoomStart(CurTime())
 	else 
 		self:SetZoom(false)
 		self:SetZoomTime(1)
 		if game.SinglePlayer() and SERVER or CLIENT then
-			self.Owner:DrawViewModel(true)
+			self:GetOwner():DrawViewModel(true)
 		end
 		self:EmitSound("ut2004/weaponsounds/BZoomOut1.wav", 50)
 	end	
@@ -106,7 +106,7 @@ function SWEP:SpecialThink()
 		local ct = CurTime()
 		self:SetZoomTime(math.max(1-(ct - self:GetZoomStart()), 0))
 		self:EmitSound("ut2004/weaponsounds/BZoomIn1.wav", 50)
-		if self.Owner:KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
+		if self:GetOwner():KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
 			self:SetZoomStart(0)
 		end
 	end
@@ -122,7 +122,7 @@ end
 
 function SWEP:AdjustMouseSensitivity()
 	if self:GetZoom() then
-		return self.Owner:GetFOV() / self.Owner:GetInfoNum("fov_desired", 90)
+		return self:GetOwner():GetFOV() / self:GetOwner():GetInfoNum("fov_desired", 90)
 	end
 end
 
