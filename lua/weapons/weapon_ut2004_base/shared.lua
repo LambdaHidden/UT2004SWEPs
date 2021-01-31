@@ -191,7 +191,7 @@ function SWEP:DisableHolster(time)
 end
 
 function SWEP:UDSound()
-	if self.Owner.UT2K4UDamage then
+	if self:GetOwner().UT2K4UDamage then
 		if game.SinglePlayer() and SERVER or !game.SinglePlayer() then
 			self:EmitSound("Weapon_UT2004.AmpFire", 100, 100, 1, CHAN_AUTO)
 		end
@@ -207,12 +207,12 @@ function SWEP:Think()
 
 	local holsterDelay = self:GetHolsterDelay()
 	if holsterDelay > 0 and holsterDelay <= CurTime() then
-		if IsValid(self.Owner) and self.Owner:Alive() and self.Owner:GetActiveWeapon() == self and self:CanHolster() then
+		if IsValid(self:GetOwner()) and self:GetOwner():Alive() and self:GetOwner():GetActiveWeapon() == self and self:CanHolster() then
 			local wep = self:GetNewWeapon()
 			if IsValid(wep) then
 				self:SetHolstering(true)
 				if game.SinglePlayer() then
-					self.Owner:SelectWeapon(wep:GetClass())
+					self:GetOwner():SelectWeapon(wep:GetClass())
 				elseif CLIENT and IsFirstTimePredicted() then
 					input.SelectWeapon(wep)
 				end
@@ -249,21 +249,21 @@ function SWEP:ShootBullet(dmg, recoil, numbul, cone, tracechance, tracename)
 
 	local bullet = {}
 	bullet.Num 		= numbul
-	bullet.Src 		= self.Owner:GetShootPos()
-	bullet.Dir 		= self.Owner:GetAimVector()
+	bullet.Src 		= self:GetOwner():GetShootPos()
+	bullet.Dir 		= self:GetOwner():GetAimVector()
 	bullet.Spread 	= Vector(cone, cone, 0)
 	bullet.Tracer	= tracechance
 	bullet.TracerName = tracename
 	bullet.Force	= 10
 	bullet.Damage	= dmg
 	
-	self.Owner:FireBullets(bullet)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():FireBullets(bullet)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:CanPrimaryAttack()
-	if !self.Owner:IsNPC() then
-		if self.Owner:GetAmmoCount(self.Primary.Ammo) == 0 then
+	if !self:GetOwner():IsNPC() then
+		if self:GetOwner():GetAmmoCount(self.Primary.Ammo) == 0 then
 			self:SetNextPrimaryFire(CurTime() + 0.2)
 			self:SetNextSecondaryFire(CurTime() + 0.2)
 			return false	 
@@ -273,12 +273,12 @@ function SWEP:CanPrimaryAttack()
 end
 
 function SWEP:TakeAmmo()
-	if !cvars.Bool("ut2k4_unlimitedammo") and !self.Owner:IsNPC() then
+	if !cvars.Bool("ut2k4_unlimitedammo") and !self:GetOwner():IsNPC() then
 		self:TakePrimaryAmmo(1)
 	end
 end
 function SWEP:TakeAmmo2()
-	if !cvars.Bool("ut2k4_unlimitedammo") and !self.Owner:IsNPC() then
+	if !cvars.Bool("ut2k4_unlimitedammo") and !self:GetOwner():IsNPC() then
 		self:TakeSecondaryAmmo(1)
 	end
 end
@@ -299,8 +299,8 @@ end
 
 function SWEP:Muzzleflash()
 	if !IsFirstTimePredicted() then return end
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:EyeAngles()
+	local pos = self:GetOwner():GetShootPos()
+	local ang = self:GetOwner():EyeAngles()
 	pos = pos +ang:Forward() *self.LightForward +ang:Right() *self.LightRight +ang:Up() *self.LightUp
 	
 	local fx = EffectData()
@@ -317,7 +317,7 @@ function SWEP:MuzzleflashSprite()
 	if !IsFirstTimePredicted() then return end
 	local fx = EffectData()
 	fx:SetEntity(self)
-	fx:SetOrigin(self.Owner:GetShootPos() +self.Owner:GetForward() *self.LightForward +self.Owner:GetRight() *self.LightRight +self.Owner:GetUp() *self.LightUp)
+	fx:SetOrigin(self:GetOwner():GetShootPos() +self:GetOwner():GetForward() *self.LightForward +self:GetOwner():GetRight() *self.LightRight +self:GetOwner():GetUp() *self.LightUp)
 	fx:SetAttachment(1)
 	util.Effect(self.MuzzleName, fx)
 	--util.Effect("ut99_mlight_minigun", fx)
@@ -328,7 +328,7 @@ if SERVER then return end
 local udamagemat2004 = Material("models/ushader")
 
 function SWEP:WorldModelMaterial()	
-	if self.Owner.UT2K4UDamage then
+	if self:GetOwner().UT2K4UDamage then
 		render.MaterialOverride(udamagemat2004)
 		self:DrawModel()
 		render.MaterialOverride(0)
@@ -358,7 +358,9 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	local reg = debug.getregistry()
 	local GetVelocity = reg.Entity.GetVelocity
 	local Length = reg.Vector.Length2D
-	local vel = Length(GetVelocity(self.Owner))
+	local vel = Length(GetVelocity(self:GetOwner()))
+	
+	--local vel = self:GetOwner():GetVelocity():Length2D()
 	
 	local bob
 	local RT = RealTime()
@@ -375,7 +377,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	BobTimeLast = RT
 
 	local s = BobTime * cl_bobmodel_speed
-	if self.Owner:IsOnGround() then
+	if self:GetOwner():IsOnGround() then
 		t = math.Approach(t, 1, FrameTime() * 6)
 	else
 		t = math.Approach(t, 0, FrameTime() * 3)
