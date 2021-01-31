@@ -33,10 +33,11 @@ function SWEP:SpecialInit()
 end
 
 function SWEP:Equip()
-	if self.Owner:HasWeapon("weapon_ut2004_dualassault") then
-		self.Owner:StripWeapon("weapon_ut2004_assault")
+	local own = self:GetOwner()
+	if own:HasWeapon("weapon_ut2004_dualassault") then
+		own:StripWeapon("weapon_ut2004_assault")
 	else
-		self.Owner:GiveAmmo(50, self.Primary.Ammo)
+		own:GiveAmmo(50, self.Primary.Ammo)
 	end
 end
 
@@ -54,12 +55,12 @@ end
 function SWEP:Grenade(force)	
 	if CLIENT then return end
 	local ent = ents.Create("ut2004_grenade")
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:EyeAngles()
+	local pos = self:GetOwner():GetShootPos()
+	local ang = self:GetOwner():EyeAngles()
 	pos = pos +ang:Right() *7 +ang:Up() *-8
 	ent:SetPos(pos)
-	ent:SetAngles(self.Owner:EyeAngles())
-	ent:SetOwner(self.Owner)
+	ent:SetAngles(self:GetOwner():EyeAngles())
+	ent:SetOwner(self:GetOwner())
 	ent:SetExplodeDelay(3)
 	ent:Spawn()
 	ent:Activate()
@@ -88,7 +89,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:SpecialThink()
-	if self.Owner:KeyReleased(IN_ATTACK2) and self.ShouldFireGrenade then
+	if self:GetOwner():KeyReleased(IN_ATTACK2) and self.ShouldFireGrenade then
 		self.ShouldFireGrenade = false
 		self:AttackStuff2()
 		self.GrenadeForce = 700
@@ -98,14 +99,14 @@ end
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
 	self:TakeAmmo()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
 
 function SWEP:AttackStuff2()	
 	self:Muzzleflash()
 	self:TakeAmmo2()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 	
 	self:SetNextPrimaryFire(CurTime() + 1)
