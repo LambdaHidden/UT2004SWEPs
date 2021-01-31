@@ -33,12 +33,12 @@ end
 function SWEP:Flak()	
 	if CLIENT then return end
 	local ent = ents.Create("ut2004_flakshell")
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:EyeAngles()
+	local pos = self:GetOwner():GetShootPos()
+	local ang = self:GetOwner():EyeAngles()
 	pos = pos +ang:Right() *7 +ang:Up() *-5
 	ent:SetPos(pos)
 	ent:SetAngles(ang)
-	ent:SetOwner(self.Owner)
+	ent:SetOwner(self:GetOwner())
 	ent:Spawn()
 	ent:Activate()		
 	local phys = ent:GetPhysicsObject()
@@ -50,14 +50,14 @@ end
 
 function SWEP:DoChunk(ang2, ang3, vel1, vel3)
 	if CLIENT then return end
-	local pos = self.Owner:GetShootPos()
-	local ang = self.Owner:EyeAngles()
+	local pos = self:GetOwner():GetShootPos()
+	local ang = self:GetOwner():EyeAngles()
 	pos = pos +ang:Right() *ang2 +ang:Up() *ang3
 	local ent = ents.Create("ut2004_flakchunk")
 	ent:SetPos(pos)
 	ent:SetAngles(ang)
-	ent:SetVar("owner",self.Owner)
-	ent:SetOwner(self.Owner)
+	ent:SetVar("owner",self:GetOwner())
+	ent:SetOwner(self:GetOwner())
 	ent:Spawn()
 	ent:Activate()	
 	local phys = ent:GetPhysicsObject()
@@ -102,7 +102,7 @@ end
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
 	self:TakeAmmo()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
 
