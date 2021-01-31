@@ -22,19 +22,19 @@ end
 function SWEP:AttackStuff()	
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	--self:Muzzleflash()
 	self:EmitSound(self.Primary.Sound, 100, 100)
 	self:UDSound()
 	--self:UTRecoil()
 	self:DisableHolster()
-	if !self.Owner:IsNPC() then self:TakePrimaryAmmo(1) end
+	if !self:GetOwner():IsNPC() then self:TakePrimaryAmmo(1) end
 end
 
 function SWEP:Restricted()
 	self:SetNextPrimaryFire(CurTime() + 2)
 	self:SetNextSecondaryFire(CurTime() + 2)
-	if !self.Owner:IsNPC() then self.Owner:PrintMessage(HUD_PRINTCENTER, "Redeemer is restricted!") end
+	if !self:GetOwner():IsNPC() then self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Redeemer is restricted!") end
 end
 
 function SWEP:PrimaryAttack()
@@ -51,8 +51,8 @@ function SWEP:PrimaryAttack()
 		return
 	end
 	
-	if !self.Owner:IsNPC() then
-		if !self.IsGuidingNuke and self.Owner:GetAmmoCount(self.Primary.Ammo) > 0 then
+	if !self:GetOwner():IsNPC() then
+		if !self.IsGuidingNuke and self:GetOwner():GetAmmoCount(self.Primary.Ammo) > 0 then
 			self:AttackStuff()
 			self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 		end
@@ -61,13 +61,13 @@ function SWEP:PrimaryAttack()
 	end
 	
 	if SERVER then	
-		local pos = self.Owner:GetShootPos()
-		local ang = self.Owner:EyeAngles()
+		local pos = self:GetOwner():GetShootPos()
+		local ang = self:GetOwner():EyeAngles()
 		pos = pos +ang:Right() *4 +ang:Up() *-7
 		local ent = ents.Create("ut2004_redeemer")
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
-		ent:SetOwner(self.Owner)
+		ent:SetOwner(self:GetOwner())
 		ent:Spawn()
 		ent:Activate()
 		ent:EmitSound(self.Primary.Sound, 100, 100)
@@ -85,9 +85,9 @@ function SWEP:SecondaryAttack()
 			return
 		end	
 
-		local PlayerPos = self.Owner:GetShootPos()
-		local PlayerAng = self.Owner:GetAimVector()
-		local PlayerRight = self.Owner:GetRight()
+		local PlayerPos = self:GetOwner():GetShootPos()
+		local PlayerAng = self:GetOwner():GetAimVector()
+		local PlayerRight = self:GetOwner():GetRight()
 
 		if !self:CanPrimaryAttack() then return end
 		
@@ -97,7 +97,7 @@ function SWEP:SecondaryAttack()
 		end
 		
 		self.Rocket = ents.Create("ut2004_redeemer")
-		self.Rocket:SetOwner(self.Owner)
+		self.Rocket:SetOwner(self:GetOwner())
 		self.Rocket:SetPos(PlayerPos)
 		self.Rocket:SetAngles(PlayerAng:Angle())
 		self.Rocket:Spawn()
@@ -125,17 +125,17 @@ end
 
 function SWEP:SpecialThink()
 	if self:Ammo1() > 1 then
-		self.Owner:SetAmmo(1, self.Primary.Ammo)
+		self:GetOwner():SetAmmo(1, self.Primary.Ammo)
 	end
 
 	if self.IsGuidingNuke and self.Rocket and self.Rocket:IsValid() then
-		local PlayerAng = self.Owner:GetAimVector()
+		local PlayerAng = self:GetOwner():GetAimVector()
 		local angles = LerpAngle(.015, self.Rocket:GetAngles(), PlayerAng:Angle())
 		local vec = LerpVector(.01, self.Rocket:GetForward(), PlayerAng)*700
 		self.Rocket:SetAngles(angles)
 		self.RocketPhysObj:SetVelocity(vec)
 		
-		local ViewEnt = self.Owner:GetViewEntity()
+		local ViewEnt = self:GetOwner():GetViewEntity()
 		
 		if self.DrawReticle and ViewEnt ~= self.Rocket then
 			self.DrawReticle = false
@@ -147,8 +147,8 @@ function SWEP:SpecialThink()
 			self:SetNWBool("DrawReticle",true)
 		end
 		
-		if ViewEnt == self.Owner or ViewEnt == NULL then
-			self.Owner:SetViewEntity(self.Rocket) 
+		if ViewEnt == self:GetOwner() or ViewEnt == NULL then
+			self:GetOwner():SetViewEntity(self.Rocket) 
 		end
 	else
 		self:StopGuiding()
@@ -158,16 +158,16 @@ end
 function SWEP:StartGuiding()
 	if not self.Rocket or self.Rocket == NULL then return end
 
-	self.LastAng = self.Owner:EyeAngles()
-	self.Owner:SetEyeAngles(self.Rocket:GetAngles())
+	self.LastAng = self:GetOwner():EyeAngles()
+	self:GetOwner():SetEyeAngles(self.Rocket:GetAngles())
 	
 	self.IsGuidingNuke = true
 	self.DrawReticle = true
 	self:SetNWBool("DrawReticle",true)
-	self.Owner:SetViewEntity(self.Rocket)
+	self:GetOwner():SetViewEntity(self.Rocket)
 	
 	if SERVER then
-		self.Owner:DrawViewModel(false)
+		self:GetOwner():DrawViewModel(false)
 	end
 end
 
@@ -178,16 +178,16 @@ function SWEP:StopGuiding()
 	self.DrawReticle = false
 	self:SetNWBool("DrawReticle",false)
 
-	umsg.Start("ExplodedBool", self.Owner)
+	umsg.Start("ExplodedBool", self:GetOwner())
 	umsg.End()
 	
-	self.Owner:SetViewEntity(self.Owner)
+	self:GetOwner():SetViewEntity(self:GetOwner())
 	
 	if SERVER then
-		self.Owner:DrawViewModel(true)
+		self:GetOwner():DrawViewModel(true)
 	end
 	
-	self.Owner:SetEyeAngles(self.LastAng)	
+	self:GetOwner():SetEyeAngles(self.LastAng)	
 end
 
 if CLIENT then
@@ -242,7 +242,7 @@ function SWEP:DrawHUD()
 		*/
 	end
 	
-	if self.Owner:GetNWBool("exploded") then
+	if self:GetOwner():GetNWBool("exploded") then
 		surface.SetTexture(static)
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
