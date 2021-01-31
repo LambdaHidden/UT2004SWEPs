@@ -32,7 +32,7 @@ end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	if self.Owner:KeyDown(IN_ATTACK2) then return end
+	if self:GetOwner():KeyDown(IN_ATTACK2) then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self.RocketCount = 1
@@ -41,7 +41,7 @@ function SWEP:PrimaryAttack()
 	self.RocketCount = 0
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	timer.Simple(self:SequenceDuration(), function()
-		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
+		if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
 			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 		end
@@ -62,7 +62,7 @@ function SWEP:SecondaryAttack()
 		self:TakeAmmo()
 		self.ShouldFireRocket = false
 		timer.Simple(self:SequenceDuration(), function()
-			if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
+			if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
 				self:SendWeaponAnim(ACT_VM_DEPLOY_1)
 				self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			end
@@ -75,7 +75,7 @@ function SWEP:SecondaryAttack()
 	self:SendWeaponAnim(ACT_VM_DEPLOY)
 	self:WeaponSound("UT2004_RL.Open")
 	timer.Simple(self:SequenceDuration(), function()
-		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
+		if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
 			--self:EmitSound(self.Primary.Special, 100, 100, 1, CHAN_ITEM)
 			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
@@ -85,7 +85,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:SpecialThink()
-	if self.Owner:KeyReleased(IN_ATTACK2) and self.ShouldFireRocket then
+	if self:GetOwner():KeyReleased(IN_ATTACK2) and self.ShouldFireRocket then
 		self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
 		self:SetNextPrimaryFire(CurTime() + self.Secondary.Delay)
 		self.ShouldFireRocket = false
@@ -95,16 +95,16 @@ function SWEP:SpecialThink()
 	end
 	
 	local trace = util.TraceLine({
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.SeekDistance,
-		filter = self.Owner
+		start = self:GetOwner():GetShootPos(),
+		endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * self.SeekDistance,
+		filter = self:GetOwner()
 	})
 
 	if !IsValid(trace.Entity) then
 		trace = util.TraceHull({
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.SeekDistance,
-		filter = self.Owner,
+		start = self:GetOwner():GetShootPos(),
+		endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * self.SeekDistance,
+		filter = self:GetOwner(),
 		mins = Vector(-16, -16, -16),
 		maxs = Vector(16, 16, 16)
 		})
@@ -138,14 +138,14 @@ end
 function SWEP:AttackStuff()	
 	self:MuzzleflashSprite()
 	self:TakeAmmo()
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
 
 function SWEP:AttackStuff2()
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	timer.Simple(self:SequenceDuration(), function()
-		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
+		if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
 			self:WeaponSound(self.Primary.Special, CHAN_ITEM)
 			self:SendWeaponAnim(ACT_VM_DEPLOY_1)
 		end
@@ -153,14 +153,14 @@ function SWEP:AttackStuff2()
 	self:WeaponSound(self.Secondary.Sound)
 	self:SetIdleDelay(CurTime() + 0.67)
 	self.RocketCount = 0
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:FireRocket()
 	if CLIENT then return end
 	
-	local ang1 = self.Owner:EyeAngles()
-	local pos1 = self.Owner:GetShootPos() + ang1:Right() * 3 + ang1:Up() * -3
+	local ang1 = self:GetOwner():EyeAngles()
+	local pos1 = self:GetOwner():GetShootPos() + ang1:Right() * 3 + ang1:Up() * -3
 	
 	local rockettbl = {
 		[1] = {
@@ -231,14 +231,14 @@ function SWEP:FireRocket()
 	for i = 1, self.RocketCount do
 	
 		local ent = ents.Create("ut2004_rocket")
-		if self.Owner:KeyDown(IN_ATTACK) then
+		if self:GetOwner():KeyDown(IN_ATTACK) then
 			ent:SetPos(rockettbltrack[self.RocketCount][i].pos)
 			ent:SetAngles(rockettbltrack[self.RocketCount][i].ang)
 		else
 			ent:SetPos(rockettbl[self.RocketCount][i].pos)
 			ent:SetAngles(rockettbl[self.RocketCount][i].ang)
 		end
-		ent:SetOwner(self.Owner)
+		ent:SetOwner(self:GetOwner())
 		ent:Spawn()
 		ent:Activate()
 		local phys = ent:GetPhysicsObject()
