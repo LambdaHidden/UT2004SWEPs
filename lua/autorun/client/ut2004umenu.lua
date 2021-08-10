@@ -6,6 +6,7 @@ local function UT2004_SettingsPanel(Panel)
 	Panel:AddControl("Slider", {Label = "Shield Gun self-damage Force", Command = "ut2k4_shieldgun_impulse", Type = "Float", Min = 0, Max = 32})
 	Panel:AddControl("Label", {Text = "Client"})
 	Panel:AddControl("CheckBox", {Label = "Fire Lighting", Command = "ut2k4_lighting"})
+	Panel:AddControl("CheckBox", {Label = "Shield deflection sound", Command = "ut2k4_shieldsound"})
 	Panel:AddControl("Slider", {Label = "Viewmodel Bob", Command = "ut2k4_bobscale", Type = "Float", Min = 0, Max = 2})
 end
 
