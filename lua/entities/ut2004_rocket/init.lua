@@ -80,7 +80,7 @@ end
 
 function ENT:Think()
 	if self.Target and IsValid(self.Target) then
-		self:SetAngles((self.Target:GetPos() - self:GetPos() + (self.Target:OBBMins() + self.Target:OBBMaxs()) *.5):Angle())
+		self:SetAngles(self.Target:WorldSpaceCenter() - self:GetPos():Angle())
 		local phys = self:GetPhysicsObject()
 		if IsValid(phys) then
 			phys:SetVelocity(self:GetForward() * 1200)
