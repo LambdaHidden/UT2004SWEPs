@@ -10,11 +10,11 @@ PrecacheParticleSystem("ut2004_link_trail")
 
 PrecacheParticleSystem("ut2004_flak_explosion")
 PrecacheParticleSystem("ut2004_flak_explosion1")
-PrecacheParticleSystem("ut2004_flak_smoketrail")
+PrecacheParticleSystem("ut2004_smoketrail_flak")
 
-PrecacheParticleSystem("ut2004_rocket_smoketrail")
+PrecacheParticleSystem("ut2004_smoketrail_rocket")
 
-PrecacheParticleSystem("ut2004_redeemer_smoketrail")
+PrecacheParticleSystem("ut2004_smoketrail_redeemer")
 PrecacheParticleSystem("ut2004_redeemer_exp")
 
 PrecacheParticleSystem("ut2004_shockcore")
@@ -28,9 +28,18 @@ PrecacheParticleSystem("ut2004_shieldgun_charge")
 PrecacheParticleSystem("ut2004_trans_tracers")
 PrecacheParticleSystem("ut2004_trans_glow")
 
+PrecacheParticleSystem("ut2004_item_spawner")
+PrecacheParticleSystem("ut2004_item_respawn")
+
+PrecacheParticleSystem("ut2004_gl_explosion")
+PrecacheParticleSystem("ut2004_smoketrail_cheap")
+PrecacheParticleSystem("ut2004_smoketrail_grenade")
+
+--PrecacheParticleSystem("ut2004_smoketrail_avril")
+
 sound.Add(
 {
-    name = "UT2004_AR.Fire",
+    name = "Weapon_UT2004.AR_Fire",
     channel = CHAN_WEAPON,
     volume = 1.0,
     soundlevel = 80,
@@ -39,11 +48,20 @@ sound.Add(
 
 sound.Add(
 {
-    name = "UT2004_RL.Open",
+    name = "Weapon_UT2004.RL_Open",
     channel = CHAN_WEAPON,
     volume = 0.4,
     soundlevel = 80,
     sound = "ut2004/weaponsounds/BRocketLauncherLoad.wav"
+})
+
+sound.Add(
+{
+    name = "Weapon_UT2004.FlakCannon_AmmoPickup",
+    channel = CHAN_ITEM,
+    volume = 0.5,
+    soundlevel = 80,
+    sound = "ut2004/pickupsounds/FlakAmmoPickup.wav"
 })
 
 sound.Add(
@@ -99,6 +117,20 @@ sound.Add(
     sound = "ut2004/gamesounds/UDamageOut.wav"
 })
 
+sound.Add(
+{
+    name = "Weapon_UT2004.ParasiteMine_Walk",
+    channel = CHAN_AUTO,
+    volume = 1.0,
+	level = 100,
+    soundlevel = 90,
+    sound = {
+		"ut2004/onsvehiclesounds-s/SpiderMineWalk01.wav",
+		"ut2004/onsvehiclesounds-s/SpiderMineWalk02.wav",
+		"ut2004/onsvehiclesounds-s/SpiderMineWalk03.wav"
+	}
+})
+
 game.AddAmmoType( { name = "ammo_bio", dmgtype = DMG_BULLET } )
 game.AddAmmoType( { name = "ammo_pulse_cell", dmgtype = DMG_BULLET } )
 game.AddAmmoType( { name = "ammo_flak_shells", dmgtype = DMG_BULLET } )
@@ -106,3 +138,5 @@ game.AddAmmoType( { name = "ammo_rifle", dmgtype = DMG_BULLET } )
 game.AddAmmoType( { name = "ammo_asmd", dmgtype = DMG_SHOCK } )
 game.AddAmmoType( { name = "ammo_translocator", dmgtype = DMG_BLUNT } )
 game.AddAmmoType( { name = "ammo_redeemer", dmgtype = DMG_BLAST } )
+game.AddAmmoType( { name = "ammo_avril_rockets", dmgtype = DMG_BLAST } )
+game.AddAmmoType( { name = "ammo_parasite_mines", dmgtype = DMG_BLAST } )
