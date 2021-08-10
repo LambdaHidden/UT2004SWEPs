@@ -115,10 +115,11 @@ function SWEP:SpecialThink()
 end
 
 function SWEP:Punch(damage, secondary, hitdist)
+	local own = self:GetOwner()
 	local bullet = {}
 		bullet.Num = 1
-		bullet.Src = self:GetOwner():GetShootPos()
-		bullet.Dir = self:GetOwner():GetAimVector()
+		bullet.Src = own:GetShootPos()
+		bullet.Dir = own:GetAimVector()
 		bullet.Spread = Vector(0,0,0)
 		bullet.Tracer = 0
 		bullet.Force = 0
@@ -130,7 +131,7 @@ function SWEP:Punch(damage, secondary, hitdist)
 	self:CallOnClient("DoMuzzleParticles")
 	
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
-	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+	own:SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
@@ -139,18 +140,18 @@ function SWEP:Punch(damage, secondary, hitdist)
 	
 	if self.LoopSound then self.LoopSound:Stop() end
 		
-	if SERVER then self:GetOwner():LagCompensation(true) end
+	if SERVER then own:LagCompensation(true) end
 	local tr = util.TraceLine({
-		start = self:GetOwner():GetShootPos(),
-		endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * hitdist,
-		filter = self:GetOwner()
+		start = own:GetShootPos(),
+		endpos = own:GetShootPos() + own:GetAimVector() * hitdist,
+		filter = own
 	})
 
 	if !IsValid(tr.Entity) then
 		tr = util.TraceHull({
-			start = self:GetOwner():GetShootPos(),
-			endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * hitdist,
-			filter = self:GetOwner(),
+			start = own:GetShootPos(),
+			endpos = own:GetShootPos() + own:GetAimVector() * hitdist,
+			filter = own,
 			mins = Vector(-4, -4, -5),
 			maxs = Vector(4, 4, 5)
 		})
@@ -160,26 +161,26 @@ function SWEP:Punch(damage, secondary, hitdist)
 
 	if tr.HitNonWorld then
 		if CLIENT then return end
-		local attacker = self:GetOwner()
+		local attacker = own
 		if (!IsValid(attacker)) then attacker = self end
 		dmginfo:SetAttacker(attacker)
 		dmginfo:SetInflictor(self)
 		dmginfo:SetDamage(damage)
-		dmginfo:SetDamageForce(self:GetOwner():GetUp() *4000 +self:GetOwner():GetForward() *22000 +self:GetOwner():GetRight() *-1000)
+		dmginfo:SetDamageForce(own:GetUp() *4000 +own:GetForward() *22000 +own:GetRight() *-1000)
 		tr.Entity:TakeDamageInfo(dmginfo)
 	end
 	if tr.HitWorld then
 		if !secondary then
 			self:GetOwner():FireBullets(bullet)
 		end
-		dmginfo:SetAttacker(self:GetOwner())
+		dmginfo:SetAttacker(own)
 		dmginfo:SetDamageType(DMG_CLUB)
 		dmginfo:SetDamage(damage*0.36)
-		dmginfo:SetDamageForce(self:GetOwner():GetUp() -self:GetOwner():GetForward() *9)
+		dmginfo:SetDamageForce(own:GetUp() -own:GetForward() * GetConVar("ut2k4_shieldgun_impulse"):GetInt()) -- 9
 		util.BlastDamageInfo(dmginfo, tr.HitPos, hitdist)
 		local Force = dmginfo:GetDamageForce()
 		local dmg = dmginfo:GetDamage()
-		self:GetOwner():SetVelocity(dmg*Force)
+		own:SetVelocity(dmg*Force)
 	end
 	if SERVER then self:GetOwner():LagCompensation(false) end
 	--self:UTRecoil()
@@ -199,13 +200,14 @@ function SWEP:DoMuzzleParticles()
 end
 
 function SWEP:DoChargeParticles()
-	self:GetOwner():GetViewModel():StopParticles()
+	local own = self:GetOwner()
+	own:GetViewModel():StopParticles()
 	self:StopParticles()
 	if CLIENT then
 		if LocalPlayer():GetViewEntity() == self:GetOwner() then
-			ParticleEffectAttach( "ut2004_shieldgun_charge", PATTACH_POINT_FOLLOW, self:GetOwner():GetViewModel(), 1 )
+			ParticleEffectAttach( "ut2004_shieldgun_charge", PATTACH_POINT_FOLLOW, own:GetViewModel(), 1 )
 		else
-			ParticleEffectAttach( "ut2004_shieldgun_charge", PATTACH_POINT_FOLLOW, self:GetOwner():GetActiveWeapon(), 1 )
+			ParticleEffectAttach( "ut2004_shieldgun_charge", PATTACH_POINT_FOLLOW, own:GetActiveWeapon(), 1 )
 		end
 	end
 end
@@ -232,7 +234,9 @@ hook.Add("EntityTakeDamage", "UT2004ShieldDamage", function(target, dmginfo)
 			target:SetNWBool("UT2K4UShield", false)
 		else
 			target:SetArmor(target:Armor() - dmginfo:GetDamage())
-			target:EmitSound("ut2004/weaponsounds/ArmorHit.wav", 80, 100, 0.8)
+			if cvars.Bool("ut2k4_shieldsound") then
+				target:EmitSound("ut2004/weaponsounds/ArmorHit.wav", 80, 100, 0.8)
+			end
 			return true
 		end
 	end
