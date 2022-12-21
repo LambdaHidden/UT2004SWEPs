@@ -1,6 +1,6 @@
 local function UT2004_SettingsPanel(Panel)
 	Panel:AddControl("Label", {Text = "Server"})
-	Panel:AddControl("CheckBox", {Label = "Restrict Redeemer", Command = "ut2k4_restrictredeemer"})
+	Panel:AddControl("CheckBox", {Label = "Restrict Superweapons", Command = "ut2k4_restrictsuperweps"})
 	Panel:AddControl("CheckBox", {Label = "Unlimited Ammo", Command = "ut2k4_unlimitedammo"})
 	Panel:AddControl("CheckBox", {Label = "Weapons Stay", Command = "ut2k4_weaponsstay"})
 	Panel:AddControl("Slider", {Label = "Shield Gun self-damage Force", Command = "ut2k4_shieldgun_impulse", Type = "Float", Min = 0, Max = 32})

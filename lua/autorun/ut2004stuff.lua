@@ -35,6 +35,8 @@ PrecacheParticleSystem("ut2004_gl_explosion")
 PrecacheParticleSystem("ut2004_smoketrail_cheap")
 PrecacheParticleSystem("ut2004_smoketrail_grenade")
 
+PrecacheParticleSystem("ut2004_bomber_explosion")
+
 --PrecacheParticleSystem("ut2004_smoketrail_avril")
 
 sound.Add(
@@ -43,7 +45,7 @@ sound.Add(
     channel = CHAN_WEAPON,
     volume = 1.0,
     soundlevel = 80,
-    sound = "ut2004/weaponsounds/BAssaultRifleFire.wav"
+    sound = "ut2004/weaponsounds/basefiringsounds/BAssaultRifleFire.wav" -- All of these are here for a reason.
 })
 
 sound.Add(
@@ -52,7 +54,7 @@ sound.Add(
     channel = CHAN_WEAPON,
     volume = 0.4,
     soundlevel = 80,
-    sound = "ut2004/weaponsounds/BRocketLauncherLoad.wav"
+    sound = "ut2004/weaponsounds/baseguntech/BRocketLauncherLoad.wav"
 })
 
 sound.Add(
@@ -119,15 +121,15 @@ sound.Add(
 
 sound.Add(
 {
-    name = "Weapon_UT2004.ParasiteMine_Walk",
+    name = "NPC_UT2004.ParasiteMine_Walk",
     channel = CHAN_AUTO,
     volume = 1.0,
 	level = 100,
     soundlevel = 90,
     sound = {
-		"ut2004/onsvehiclesounds-s/SpiderMineWalk01.wav",
-		"ut2004/onsvehiclesounds-s/SpiderMineWalk02.wav",
-		"ut2004/onsvehiclesounds-s/SpiderMineWalk03.wav"
+		"ut2004/onsvehiclesounds-s/spidermines/SpiderMineWalk01.wav",
+		"ut2004/onsvehiclesounds-s/spidermines/SpiderMineWalk02.wav",
+		"ut2004/onsvehiclesounds-s/spidermines/SpiderMineWalk03.wav"
 	}
 })
 
@@ -140,3 +142,4 @@ game.AddAmmoType( { name = "ammo_translocator", dmgtype = DMG_BLUNT } )
 game.AddAmmoType( { name = "ammo_redeemer", dmgtype = DMG_BLAST } )
 game.AddAmmoType( { name = "ammo_avril_rockets", dmgtype = DMG_BLAST } )
 game.AddAmmoType( { name = "ammo_parasite_mines", dmgtype = DMG_BLAST } )
+game.AddAmmoType( { name = "ammo_tgtpainter", dmgtype = DMG_GENERIC } )
