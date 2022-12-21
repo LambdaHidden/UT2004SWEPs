@@ -8,7 +8,11 @@ end
 function ENT:Draw()
 	--self.Spin = self.Spin + FrameTime()*180
 	--self:SetRenderAngles(self.Ang + Angle(0,0,self.Spin))
-	self:SetRenderAngles(self:GetAngles() + Angle(0,0,FrameTime()*180))
+	if IsValid(self.Target) then
+		self:SetAngles((self.Target:WorldSpaceCenter() - self:GetPos()):Angle())
+	else
+		self:SetRenderAngles(self:GetAngles() + Angle(0,0,FrameTime()*180))
+	end
 	self:DrawModel()
 	
 	if !cvars.Bool("ut2k4_lighting") then return end

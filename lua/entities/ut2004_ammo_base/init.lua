@@ -1,5 +1,10 @@
 AddCSLuaFile("shared.lua")
+AddCSLuaFile("cl_init.lua")
 include('shared.lua')
+
+function ENT:SetupDataTables()
+	self:NetworkVar( "Bool", 0, "Available" )
+end
 
 function ENT:SpawnFunction(ply, tr)
 	if (!tr.Hit) then return end
@@ -15,7 +20,7 @@ function ENT:Initialize()
 	self:SetModel(self.model)
 	self:SetMoveType(MOVETYPE_NONE)
 	self:DrawShadow(true)
-	self.Available = true
+	self:SetAvailable(true)
 	self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 	self:SetRenderMode(RENDERMODE_TRANSALPHA)
 	self:SetTrigger(true)
@@ -25,22 +30,27 @@ end
 function ENT:Think()
 	if self.ReEnabled and CurTime() >= self.ReEnabled then
 		self.ReEnabled = nil
-		self.Available = true
-		self:SetNoDraw(false)
-		self:EmitSound("ut2004/weaponsounds/item_respawn.wav")
-		local effectdata = EffectData()
+		self:EmitSound("ut2004/weaponsounds/misc/item_respawn.wav")
+		ParticleEffect( "ut2004_item_respawn", self:WorldSpaceCenter(), Angle(0,0,0), self )
+		timer.Simple(0.5, function()
+			if IsValid(self) then
+				self:SetAvailable(true)
+				self:DrawShadow(true)
+			end
+		end)
+		/*local effectdata = EffectData()
 		effectdata:SetEntity(self)
 		effectdata:SetOrigin(self:GetPos())
-		util.Effect("entity_remove", effectdata, true, true)
+		util.Effect("entity_remove", effectdata, true, true)*/
 	end
 end
 
 function ENT:Touch(ent)
-	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self.Available then
+	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self:GetAvailable() then
 		local ammoCount = ent:GetAmmoCount(self.AmmoType)
 		if ammoCount >= self.MaxAmmo then return end
-		self.Available = false
-		self:SetNoDraw(true)
+		self:SetAvailable(false)
+		self:DrawShadow(false)
 		self.ReEnabled = CurTime() + 25
 		
 		ent:EmitSound(self.PickupSound,85,100)
@@ -48,6 +58,6 @@ function ENT:Touch(ent)
 			ent:SetAmmo(math.min(ammoCount + self.AmmoAmount, self.MaxAmmo), self.AmmoType)
 		end
 		
-		ent:SetNWFloat("ut2004itempickup", CurTime())
+		ent:SetNW2Float("ut2004itempickup", CurTime())
 	end
 end

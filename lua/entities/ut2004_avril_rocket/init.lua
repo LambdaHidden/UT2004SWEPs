@@ -4,7 +4,7 @@ AddCSLuaFile( "shared.lua" )
 include( 'shared.lua' )
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/avril.mdl")
+	self:SetModel("models/ut2004/vmweaponssm/avrilgroup/avrilprojectilesm.mdl")
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -35,7 +35,7 @@ function ENT:Initialize()
 		phys:SetBuoyancyRatio(0)
 	end
 	
-	self.flysound = CreateSound(self, "ut2004/onsvehiclesounds-s/AvrilProjectileLoop01.wav")
+	self.flysound = CreateSound(self, "ut2004/onsvehiclesounds-s/avril/AvrilProjectileLoop01.wav")
 	self.flysound:Play()
 
 	self:SetRemoveDelay(7)
@@ -67,7 +67,7 @@ function ENT:PhysicsCollide(data)
 	--ParticleEffect( "ut2004_flak_explosion1", self:GetPos(), self:GetAngles() )
 
 	util.BlastDamage(self, self:GetOwner(), start, 125, 112)
-	self:EmitSound("ut2004/weaponsounds/BExplosion3.wav", 100, 100)
+	self:EmitSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion3.wav", 100, 100)
 	self:Remove()
 end
 
@@ -86,7 +86,7 @@ function ENT:Think()
 	--print(self.Acceleration)
 	local phys = self:GetPhysicsObject()
 	if self.Target and IsValid(self.Target) then
-		self:SetAngles(self.Target:WorldSpaceCenter() - self:GetPos():Angle())
+		self:SetAngles((self.Target:WorldSpaceCenter() - self:GetPos()):Angle())
 	end
 	if IsValid(phys) then
 		phys:SetVelocity(self:GetForward() * self.Acceleration)

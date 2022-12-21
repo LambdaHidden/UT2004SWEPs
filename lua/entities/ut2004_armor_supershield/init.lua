@@ -6,12 +6,12 @@ ENT.RespawnTime = 54
 ENT.Aamount = 100
 ENT.MaxArmor = 150
 ENT.PickupSound = "ut2004/pickupsounds/LargeShieldPickup.wav"
-ENT.model = "models/ut2004/items/powerup_supershield.mdl"
+ENT.model = "models/ut2004/e_pickups/general/supershield.mdl"
 
 function ENT:Touch(ent)
-	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self.Available then
-		self.Available = false
-		self:SetNoDraw(true)
+	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self:GetAvailable() then
+		self:SetAvailable(false)
+		self:DrawShadow(false)
 		self.ReEnabled = CurTime() + self.RespawnTime
 		
 		ent.UT2K4UShield = true

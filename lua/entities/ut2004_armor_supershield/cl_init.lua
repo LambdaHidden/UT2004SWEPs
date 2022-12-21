@@ -1,5 +1,9 @@
 include('shared.lua')
 
+function ENT:SetupDataTables()
+	self:NetworkVar( "Bool", 0, "Available" )
+end
+
 hook.Add("PostPlayerDraw", "UT2K4UShieldBeltShell", function(ply)
 	local iIndex = ply:EntIndex()
 	hook.Add("RenderScreenspaceEffects", "UT2K4UShieldPlayerOverlay" .. iIndex, function()
