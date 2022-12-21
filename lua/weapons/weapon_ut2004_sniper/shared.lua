@@ -20,7 +20,7 @@ if CLIENT then
 	language.Add( "ammo_rifle", "Rifle rounds" )
 	--killicon.Add( "weapon_ut99_rifle", "vgui/ut99/rifle", Color( 255, 80, 0, 255 ) )
 	
-	local RReticle = surface.GetTextureID("ut2004/effects/CogAssaultZoomedCrosshair")
+	local RReticle = surface.GetTextureID("ut2004/newsniperrifle/1stPerson/CogAssaultZoomedCrosshair")
 	
 	function SWEP:DrawHUD()
 		local x, y
@@ -72,14 +72,15 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	--self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:Muzzleflash()
-	local anim = {ACT_VM_RECOIL1, ACT_VM_RECOIL2, ACT_VM_RECOIL3}
-	if !self:GetZoom() then self:SendWeaponAnim(anim[math.random(1,3)]) end
+	if !self:GetZoom() then self:SendWeaponAnim(ACT_VM_PRIMARYATTACK) end
 	self:WeaponSound(self.Primary.Sound, CHAN_ITEM)
 	self:UDSound()
+	if SERVER then self:GetOwner():LagCompensation(true) end
 	self:ShootBullet( self.Primary.Damage, self.Primary.Recoil, self.Primary.NumShots, self.Primary.Cone )
+	if SERVER then self:GetOwner():LagCompensation(false) end
 	--self:UTRecoil()
 	self:DisableHolster()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
 end
 
@@ -97,7 +98,7 @@ function SWEP:SecondaryAttack()
 		if game.SinglePlayer() and SERVER or CLIENT then
 			self:GetOwner():DrawViewModel(true)
 		end
-		self:EmitSound("ut2004/weaponsounds/BZoomOut1.wav", 50)
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BZoomOut1.wav", 50)
 	end	
 end
 
@@ -105,7 +106,7 @@ function SWEP:SpecialThink()
 	if self:GetZoomStart() > 0 then
 		local ct = CurTime()
 		self:SetZoomTime(math.max(1-(ct - self:GetZoomStart()), 0))
-		self:EmitSound("ut2004/weaponsounds/BZoomIn1.wav", 50)
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BZoomIn1.wav", 50)
 		if self:GetOwner():KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
 			self:SetZoomStart(0)
 		end
@@ -144,8 +145,8 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_sniper.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_sniper.mdl"
+SWEP.ViewModel			= "models/ut2004/newweapons2004/sniperrifle_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/newweapons2004/sniper3rd.mdl"
 
 SWEP.Primary.Sound			= Sound("ut2004/newweaponsounds/NewSniperShot.wav")
 SWEP.Primary.Recoil			= .8

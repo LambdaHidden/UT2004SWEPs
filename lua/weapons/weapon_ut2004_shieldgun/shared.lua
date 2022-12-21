@@ -60,7 +60,7 @@ function SWEP:SecondaryAttack()
 		util.Effect("ut2004_shield_model", eff)
 	end
 	
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	--self:SetIdleDelay(CurTime() + self:SequenceDuration())
 end
 
@@ -70,7 +70,7 @@ function SWEP:PrimaryAttack()
 	if self.Charge == 0 then
 		self:SendWeaponAnim(ACT_VM_PULLBACK)
 		
-		self:CallOnClient("DoChargeParticles")
+		--self:CallOnClient("DoChargeParticles")
 		
 		if !self.LoopSound then
 			self.LoopSound = CreateSound(self:GetOwner(), self.Secondary.Sound)
@@ -128,7 +128,7 @@ function SWEP:Punch(damage, secondary, hitdist)
 	
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	
-	self:CallOnClient("DoMuzzleParticles")
+	--self:CallOnClient("DoMuzzleParticles")
 	
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
 	own:SetAnimation(PLAYER_ATTACK1)
@@ -176,7 +176,7 @@ function SWEP:Punch(damage, secondary, hitdist)
 		dmginfo:SetAttacker(own)
 		dmginfo:SetDamageType(DMG_CLUB)
 		dmginfo:SetDamage(damage*0.36)
-		dmginfo:SetDamageForce(own:GetUp() -own:GetForward() * GetConVar("ut2k4_shieldgun_impulse"):GetInt()) -- 9
+		dmginfo:SetDamageForce(own:GetUp() -own:GetAimVector() * GetConVar("ut2k4_shieldgun_impulse"):GetInt()) -- 9
 		util.BlastDamageInfo(dmginfo, tr.HitPos, hitdist)
 		local Force = dmginfo:GetDamageForce()
 		local dmg = dmginfo:GetDamage()
@@ -186,7 +186,7 @@ function SWEP:Punch(damage, secondary, hitdist)
 	--self:UTRecoil()
 	self:DisableHolster()
 end
-
+/*
 function SWEP:DoMuzzleParticles()
 	self:GetOwner():GetViewModel():StopParticles()
 	self:StopParticles()
@@ -211,7 +211,7 @@ function SWEP:DoChargeParticles()
 		end
 	end
 end
-
+*/
 hook.Add("EntityTakeDamage", "UT2004ShieldDamage", function(target, dmginfo)
 	if target:IsPlayer() then
 		--print("isplayer")
@@ -231,11 +231,11 @@ hook.Add("EntityTakeDamage", "UT2004ShieldDamage", function(target, dmginfo)
 		
 		if target:Armor() <= 100 then
 			target.UT2K4UShield = nil
-			target:SetNWBool("UT2K4UShield", false)
+			target:SetNW2Bool("UT2K4UShield", false)
 		else
 			target:SetArmor(target:Armor() - dmginfo:GetDamage())
 			if cvars.Bool("ut2k4_shieldsound") then
-				target:EmitSound("ut2004/weaponsounds/ArmorHit.wav", 80, 100, 0.8)
+				target:EmitSound("ut2004/weaponsounds/misc/ArmorHit.wav", 80, 100, 0.8)
 			end
 			return true
 		end
@@ -247,11 +247,11 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_shieldgun.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_shieldgun.mdl"
+SWEP.ViewModel			= "models/ut2004/weapons/shieldgun_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/weapons/shieldgun_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BShieldGunFire.wav")
-SWEP.Primary.Special			= Sound("ut2004/weaponsounds/BShield1.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BShieldGunFire.wav")
+SWEP.Primary.Special			= Sound("ut2004/weaponsounds/basefiringsounds/BShield1.wav")
 SWEP.Primary.Damage			= 7
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.Cone			= .09
@@ -261,10 +261,10 @@ SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Automatic		= true
 SWEP.Primary.Ammo			= "Battery"
 
-SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/shieldgun_charge.wav")
+SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/misc/shieldgun_charge.wav")
 SWEP.Secondary.Delay		= 0.2
 SWEP.Secondary.Automatic	= true
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/shieldgun_change.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/misc/shieldgun_change.wav")
 
 SWEP.DelayBeforeShot = .8

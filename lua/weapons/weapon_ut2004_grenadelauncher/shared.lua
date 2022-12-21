@@ -28,7 +28,7 @@ SWEP.Grenades = {}
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
-	util.PrecacheSound("ut2004/weaponsounds/BExplosion1.wav")
+	util.PrecacheSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion1.wav")
 end
 
 function SWEP:Equip(newown)
@@ -45,20 +45,20 @@ function SWEP:Launch()
 		self.Grenades[1]:Explode()
 		--table.remove(self.Grenades[1])
 	end
-	
+	local own = self:GetOwner()
 	local ent = ents.Create("ut2004_grenade2")
-	local pos = self:GetOwner():GetShootPos()
-	local ang = self:GetOwner():EyeAngles()
+	local pos = own:GetShootPos()
+	local ang = own:EyeAngles()
 	pos = pos +ang:Right() *7 +ang:Up() *-5
 	ent:SetPos(pos)
 	ent:SetAngles(ang)
-	ent:SetOwner(self:GetOwner())
+	ent:SetOwner(own)
 	ent.OwnerGun = self
 	ent:Spawn()
 	ent:Activate()		
 	local phys = ent:GetPhysicsObject()
 	if IsValid(phys) then
-		local vel = self:GetOwner():GetAimVector() *2800 --Tweak those values!
+		local vel = own:GetAimVector() *2800 --Tweak those values!
 		phys:ApplyForceCenter(vel)
 	end
 	
@@ -90,7 +90,7 @@ end
 
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
@@ -100,10 +100,10 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_grenadelauncher.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_grenadelauncher.mdl"
+SWEP.ViewModel			= "models/ut2004/onsweapons-a/grenadelauncher_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/onsweapons-a/grenadelauncher_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BBioRifleFire.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BBioRifleFire.wav")
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.Delay			= 0.8
@@ -115,7 +115,7 @@ SWEP.Primary.Ammo			= "Grenade"
 SWEP.Secondary.Delay		= 1
 SWEP.Secondary.Automatic	= false
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToFlakCannon.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/flakcannon/SwitchToFlakCannon.wav")
 
 SWEP.MuzzleName				= "ut2004_mflash_flak"
 SWEP.LightForward			= 46

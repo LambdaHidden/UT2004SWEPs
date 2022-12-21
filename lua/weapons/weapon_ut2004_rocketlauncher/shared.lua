@@ -59,7 +59,7 @@ function SWEP:SecondaryAttack()
 		self.RocketCount = self.RocketCount + 1
 		self:FireRocket()
 		self:AttackStuff2()
-		self:TakeAmmo()
+		self:TakeAmmo(1)
 		self.ShouldFireRocket = false
 		timer.Simple(self:SequenceDuration(), function()
 			if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
@@ -71,9 +71,9 @@ function SWEP:SecondaryAttack()
 	end
 	
 	self.RocketCount = self.RocketCount + 1
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:SendWeaponAnim(ACT_VM_DEPLOY)
-	self:WeaponSound("UT2004_RL.Open")
+	self:WeaponSound("Weapon_UT2004.RL_Open")
 	timer.Simple(self:SequenceDuration(), function()
 		if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():Alive() then
 			--self:EmitSound(self.Primary.Special, 100, 100, 1, CHAN_ITEM)
@@ -119,7 +119,7 @@ function SWEP:SpecialThink()
 				self.seek = CurTime() +.25
 				if game.SinglePlayer() and CLIENT or !game.SinglePlayer() then self:EmitSound("ut2004/weaponsounds/BLockOn1.wav") end
 				self.target = target
-				self:SetNWBool("seekcrosshair", true)
+				self:SetNW2Bool("seekcrosshair", true)
 			end		
 		end
 	end
@@ -131,13 +131,13 @@ function SWEP:SpecialThink()
 	if self.seekDelay and (CurTime() - self.seekDelay) >= 1 then
 		self.seekDelay = nil
 		if game.SinglePlayer() and CLIENT or !game.SinglePlayer() then self:EmitSound("ut2004/weaponsounds/BSeekLost1.wav") end		
-		self:SetNWBool("seekcrosshair", false)
+		self:SetNW2Bool("seekcrosshair", false)
 	end
 end
 
 function SWEP:AttackStuff()	
 	self:MuzzleflashSprite()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
@@ -258,11 +258,11 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_rocketlauncher.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_rocketlauncher.mdl"
+SWEP.ViewModel			= "models/ut2004/weapons/rocketlauncher_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/weapons/rocketlauncher_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BRocketLauncherFire.wav")
-SWEP.Primary.Special		= Sound("ut2004/weaponsounds/RocketLauncherPlunger.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BRocketLauncherFire.wav")
+SWEP.Primary.Special		= Sound("ut2004/weaponsounds/rocketlauncher/RocketLauncherPlunger.wav")
 --SWEP.Primary.Special2		= Sound("weapons/ut99/BRocketLauncherLoad.wav")
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.Delay			= 0.9
@@ -270,11 +270,11 @@ SWEP.Primary.DefaultClip	= 12
 SWEP.Primary.Automatic		= true
 SWEP.Primary.Ammo			= "RPG_Round"
 
-SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/BRocketLauncherAltFire.wav")
+SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/basefiringsounds/BRocketLauncherAltFire.wav")
 SWEP.Secondary.Delay			= 1.0
 SWEP.Secondary.Automatic	= true
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToRocketLauncher.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/rocketlauncher/SwitchToRocketLauncher.wav")
 SWEP.mode 					= "single"
 SWEP.SeekDistance			= 4096
 SWEP.MuzzleName				= "ut2004_mflash_flak"

@@ -82,7 +82,9 @@ function SWEP:PrimaryAttack()
 			self:PrimarySoundStart()
 			self:SetSecAttack(true)
 		end
+		if SERVER then self:GetOwner():LagCompensation(true) end
 		self:ShootBullet(self.Primary.Damage, self.Primary.Recoil, 1, self.Primary.Cone)
+		if SERVER then self:GetOwner():LagCompensation(false) end
 		--self:Smoke()
 		self:TakeAmmo(1)
 		self:Muzzleflash()
@@ -110,7 +112,9 @@ function SWEP:SecondaryAttack()
 			self:SecondarySoundStart()
 			self:SetSecAttack(true)
 		end
+		if SERVER then self:GetOwner():LagCompensation(true) end
 		self:ShootBullet(self.Secondary.Damage, self.Primary.Recoil, 1, self.Secondary.Cone, 1)
+		if SERVER then self:GetOwner():LagCompensation(false) end
 		--self:Smoke()
 		self:TakeAmmo(1)
 		self:Muzzleflash()
@@ -187,7 +191,7 @@ end
 
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
@@ -197,11 +201,11 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_minigun.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_minigun.mdl"
+SWEP.ViewModel			= "models/ut2004/weapons/minigun_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/weapons/minigun_3rd.mdl"
 
 SWEP.Primary.Sound			= Sound("ut2004/newweaponsounds/NewMinigunFire.wav")
-SWEP.Primary.Special			= Sound("ut2004/weaponsounds/miniempty.wav")
+SWEP.Primary.Special		= Sound("ut2004/weaponsounds/minigun/miniempty.wav")
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.Delay			= 0.05
@@ -213,13 +217,13 @@ SWEP.Primary.Damage 		= 7
 
 SWEP.BarrelAccelTime		= 3.5
 
-SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/minialtfireb.wav")
+SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/minigun/minialtfireb.wav")
 SWEP.Secondary.Delay		= 0.15
 SWEP.Secondary.Automatic	= true
 SWEP.Secondary.Damage 		= 15
 SWEP.Secondary.Cone 			= 0.02
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToMinigun.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/minigun/SwitchToMinigun.wav")
 
 SWEP.MuzzleName				= ""
 SWEP.LightForward			= 52

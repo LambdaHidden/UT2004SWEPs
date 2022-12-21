@@ -1,5 +1,5 @@
-local exists = file.Exists("materials/ut2004/effects/flak_flash.vmt", "GAME")
-EFFECT.mat = Material("ut2004/effects/flak_flash")
+--local exists = file.Exists("materials/ut2004/xgameshaders/flak_flash.vmt", "GAME")
+--EFFECT.mat = Material("ut2004/xgameshaders/flak_flash")
 
 function EFFECT:Init(data) 
 	self.time = CurTime()+1

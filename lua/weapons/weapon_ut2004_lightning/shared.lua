@@ -20,9 +20,10 @@ if CLIENT then
 	--language.Add( "ammo_rifle", "Rifle rounds" )
 	--killicon.Add( "weapon_ut99_rifle", "vgui/ut99/rifle", Color( 255, 80, 0, 255 ) )
 	
-	local RReticle = surface.GetTextureID("ut2004/effects/SniperFocus")
-	local RArrows = surface.GetTextureID("ut2004/effects/SniperArrows")
-	local RInterlace1 = surface.GetTextureID("ut2004/effects/SniperInterlace")
+	local RReticle = surface.GetTextureID("ut2004/xweapons_rc/icons/SniperFocus")
+	local RArrows = surface.GetTextureID("ut2004/xweapons_rc/icons/SniperArrows")
+	local RInterlace1 = surface.GetTextureID("ut2004/xgameshaders/zoomfx/fulloverlay")
+	local RScanLine = surface.GetTextureID("ut2004/xgameshaders/zoomfx/zoomfb")
 	
 	function SWEP:DrawHUD()
 		local x, y
@@ -32,10 +33,13 @@ if CLIENT then
 			surface.SetDrawColor(255, 255, 255, 255)
 			
 			surface.SetTexture(RInterlace1)
-			surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
+			surface.DrawTexturedRect(-x, -y, ScrW()*2, ScrH()*2)
 			
 			surface.SetTexture(RReticle)
 			surface.DrawTexturedRect(128 , -64 , ScrW()-256, ScrH() + 128)
+			
+			surface.SetTexture(RScanLine)
+			surface.DrawTexturedRectUV( 0, 0, ScrW(), ScrH(), 0, 0, 2, 2 )
 			
 			surface.SetTexture(RArrows)
 			surface.SetDrawColor(255, 0, 0, 255)
@@ -59,11 +63,11 @@ function SWEP:SpecialDT()
 	self:NetworkVar("Float", 5, "ZoomTime")
 	self:NetworkVar("Float", 6, "ZoomStart")
 end
-
+/*
 function SWEP:SpecialDeploy()
 	ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self:GetOwner():GetViewModel(), 2 )
 end
-
+*/
 function SWEP:OnRemove()
 	self:SetZoom(false)
 	self:SetZoomStart(0)
@@ -77,20 +81,26 @@ function SWEP:PrimaryAttack()
 	self:Muzzleflash()
 	if !self:GetZoom() then self:SendWeaponAnim(ACT_VM_PRIMARYATTACK) end
 	
-	local hitpos = self:GetOwner():GetEyeTrace().HitPos
+	local own = self:GetOwner()
+	
+	if SERVER then own:LagCompensation(true) end
+	
+	local eyetr = own:GetEyeTrace()
 	
 	self:WeaponSound(self.Primary.Sound, CHAN_ITEM)
-	self:WeaponSound("ut2004/weaponsounds/LightningGunChargeUp.wav")
-	EmitSound( "ut2004/weaponsounds/BLightningGunImpact.wav", hitpos, self:EntIndex() )
+	self:WeaponSound("ut2004/weaponsounds/lightninggun/LightningGunChargeUp.wav")
+	EmitSound( "ut2004/weaponsounds/BLightningGunImpact.wav", eyetr.HitPos, self:EntIndex() )
 	self:UDSound()
 	
-	util.ParticleTracerEx( "ut2004_lightning", self:GetOwner():GetShootPos(), hitpos, false, self:EntIndex(), 1 )
-	ParticleEffect( "ut2004_lightning_sparks", hitpos, self:GetOwner():GetEyeTrace().HitNormal:Angle() )
+	util.ParticleTracerEx( "ut2004_lightning", own:GetShootPos(), eyetr.HitPos, false, self:EntIndex(), 1 )
+	ParticleEffect( "ut2004_lightning_sparks", eyetr.HitPos, eyetr.HitNormal:Angle() )
 	
 	self:ShootBullet( self.Primary.Damage, self.Primary.Recoil, self.Primary.NumShots, self.Primary.Cone, 0 )
+	
+	if SERVER then own:LagCompensation(false) end
 	--self:UTRecoil()
 	self:DisableHolster()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
 end
 
@@ -110,7 +120,7 @@ function SWEP:SecondaryAttack()
 			self:GetOwner():DrawViewModel(true)
 		end
 		ParticleEffectAttach( "ut2004_lightning_vm", PATTACH_POINT_FOLLOW, self:GetOwner():GetViewModel(), 2 )
-		self:EmitSound("ut2004/weaponsounds/BZoomOut1.wav", 50)
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BZoomOut1.wav", 50)
 	end	
 end
 
@@ -118,7 +128,7 @@ function SWEP:SpecialThink()
 	if self:GetZoomStart() > 0 then
 		local ct = CurTime()
 		self:SetZoomTime(math.max(1-(ct - self:GetZoomStart()), 0))
-		self:EmitSound("ut2004/weaponsounds/BZoomIn1.wav", 50)
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BZoomIn1.wav", 50)
 		if self:GetOwner():KeyReleased(IN_ATTACK2) or ct-.89 >= self:GetZoomStart() then
 			self:SetZoomStart(0)
 		end
@@ -144,10 +154,10 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_lightning.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_lightning.mdl"
+SWEP.ViewModel			= "models/ut2004/weapons/sniper_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/weapons/sniper_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BLightningGunFire.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BLightningGunFire.wav")
 SWEP.Primary.Recoil			= .8
 SWEP.Primary.Damage			= 70
 SWEP.Primary.NumShots		= 1
@@ -160,7 +170,7 @@ SWEP.Primary.Ammo			= "ammo_rifle"
 
 SWEP.Secondary.Automatic	= false
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToLightningGun.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/lightninggun/SwitchToLightningGun.wav")
 
 SWEP.MuzzleName				= ""
 SWEP.LightForward = 50

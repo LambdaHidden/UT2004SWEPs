@@ -5,6 +5,7 @@ if SERVER then
 	CreateConVar("ut2k4_restrictredeemer", 0, FVAR_NONE, "Restrict Redeemer")
 	CreateConVar("ut2k4_unlimitedammo", 0, FCVAR_NOTIFY, "Unlimited ammo for everyone")
 	CreateConVar("ut2k4_weaponsstay", 1, FCVAR_NOTIFY, "Weapons can always be picked up")
+	CreateConVar("ut2k4_shieldgun_impulse", 9, FVAR_NONE, "Force multiplier for Shield Gun boosted jumps")
 	
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
@@ -13,7 +14,7 @@ end
 
 if CLIENT then
 
-	include("cl_ammodisp.lua")
+	--include("cl_ammodisp.lua")
 
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= true
@@ -30,7 +31,7 @@ SWEP.Author				= "Upset & Hidden"
 SWEP.Contact			= ""
 SWEP.Purpose			= ""
 SWEP.Instructions		= ""
-SWEP.Category			= "Unreal Tournament"
+SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= false
 
 SWEP.Primary.Recoil			= 1
@@ -52,24 +53,34 @@ SWEP.DelayBeforeShot		= .5
 
 function SWEP:SetupDataTables()
 	self:NetworkVar("Float", 0, "IdleDelay")
-	self:NetworkVar("Bool", 0, "Attack")
-	self:NetworkVar("Bool", 1, "SecAttack")
+	self:NetworkVar("Float", 1, "HolsterDelay")
+	self:NetworkVar("Float", 2, "AttackHolsterDelay")
+	self:NetworkVar("Bool", 0, "Holstering")
+	self:NetworkVar("Bool", 1, "Attack")
+	self:NetworkVar("Bool", 2, "SecAttack")
+	self:NetworkVar("Entity", 0, "NewWeapon")
 	
-	self:NetworkVar("Float", 1, "AttackDelay")
-	self:NetworkVar("Float", 2, "SecAttackDelay")
+	self:NetworkVar("Float", 3, "AttackDelay")
+	self:NetworkVar("Float", 4, "SecAttackDelay")
 	
-	self:NetworkVar("Bool", 2, "Zoom")
-	self:NetworkVar("Float", 3, "ZoomTime")
-	self:NetworkVar("Float", 4, "ZoomStart")
+	--self:NetworkVar("Bool", 3, "Zoom")
+	--self:NetworkVar("Float", 5, "ZoomTime")
+	--self:NetworkVar("Float", 6, "ZoomStart")
 	
-	self:NetworkVar("Bool", 3, "Holstering")
-	
-	self:NetworkVar("Float", 5, "ShotAmount")
+	--self:NetworkVar("Float", 5, "ShotAmount")
+	self:SpecialDT()
+end
+
+function SWEP:SpecialDT()
 end
 
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
-	self:SetHolstering(false)
+	--self:SetHolstering(false)
+	self:SpecialInit()
+end
+
+function SWEP:SpecialInit()
 end
 
 function SWEP:OnRestore()
@@ -82,60 +93,94 @@ function SWEP:Deploy()
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:PlayDeploySound()
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
+	self:SpecialDeploy()
 	return true
+end
+
+function SWEP:SpecialDeploy()
 end
 
 function SWEP:PlayDeploySound()
 	local owner = self:GetOwner()
-	if (owner && owner:IsValid() && owner:IsPlayer() && owner:Alive()) then
+	if owner && owner:IsValid() && owner:IsPlayer() && owner:Alive() then
 		self:EmitSound(self.DeploySound)
 	end
 end
 
+function SWEP:DelayedHolster(wep)
+	if IsValid(wep) and !self:GetHolstering() then
+		self:SetNewWeapon(wep)
+		if self:GetHolsterDelay() <= CurTime() then
+			self:SetIdleDelay(0)
+			self:SetNextPrimaryFire(CurTime() + .5)
+			self:SetNextSecondaryFire(CurTime() + .5)
+			self:SendWeaponAnim(ACT_VM_HOLSTER)
+			self:SpecialHolster()
+			local delay = self.HolsterTime or self:SequenceDuration()
+			self:SetHolsterDelay(CurTime() + delay)
+		end
+	end
+end
+
+function SWEP:SpecialHolster()
+end
+
+function SWEP:CanHolster()
+	return !self:GetAttack() and !self:GetSecAttack() and (!self.cantholster or self.cantholster <= CurTime())
+end
+
 function SWEP:Holster(wep)
-	if self.cantholster and self.cantholster > CurTime() then return false end
-	
 	if self == wep then
 		return
 	end
 	
-	if !IsValid(wep) then
-		if game.SinglePlayer() then
-			self:CallOnClient("OnRemove")
+	if self:GetHolstering() or !IsValid(wep) then
+		if !self.NoOnRemoveCallOnHolster then
+			self:OnRemove()
 		end
-		self:OnRemove()
+		if game.SinglePlayer() then
+			self:CallOnClient("ResetBonePositions")
+		else
+			if CLIENT then
+				self:ResetBonePositions()
+			end
+		end
+		self:SetHolsterDelay(0)
+		self:SetHolstering(false)
+		self:SetNewWeapon(NULL)
 		return true
 	end
 	
 	if self.bInAttack or self.IsGuidingNuke then return end
 
-	--if self.cantholster and self.cantholster > CurTime() then
-		if IsValid(wep) and !self:GetHolstering() then
-			self.NewWeapon = wep:GetClass()
-			self:SendWeaponAnim(ACT_VM_HOLSTER)
-			self:SetHolstering(true)
-			self.cantholster = CurTime() + self:SequenceDuration() - 0.05
-			timer.Simple(self:SequenceDuration(), function()
-				if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
-					if SERVER then self.Owner:SelectWeapon(self.NewWeapon) end
-				end
-			end)
-			return false
+	if !self:CanHolster() then
+		if IsValid(wep) then
+			self:SetHolsterDelay(0)
+			self:SetNewWeapon(wep)
+			local t = self.cantholster or CurTime()
+			self:SetAttackHolsterDelay(t)
 		end
-	
-	self:SetHolstering(false)
-	self:SetIdleDelay(0)
-	--end
-	if game.SinglePlayer() then
-		self:CallOnClient("OnRemove")
+		return false
 	end
-	self:OnRemove()
-	return true
+	
+	--if self:GetClass() == "weapon_ut99_enforcer" and wep:GetClass() == "weapon_ut99_dualenforcers" then return true end
+	
+	self:DelayedHolster(wep)
+	
+	return false
 end
 
-function SWEP:WeaponSound(snd)
+function SWEP:OnRemove()
+end
+
+function SWEP:OnDrop()
+	self:OnRemove()
+end
+
+function SWEP:WeaponSound(snd, chan)
 	if game.SinglePlayer() and SERVER or !game.SinglePlayer() then
-		self:EmitSound(snd, 100, 100, 1, CHAN_AUTO)
+		
+		self:EmitSound(snd, 100, 100, 1, chan or CHAN_AUTO)
 	end
 	self:DisableHolster()
 end
@@ -158,6 +203,33 @@ end
 
 function SWEP:Think()
 	self:SpecialThink()
+	if game.SinglePlayer() and CLIENT then return end
+
+	local holsterDelay = self:GetHolsterDelay()
+	if holsterDelay > 0 and holsterDelay <= CurTime() then
+		if IsValid(self.Owner) and self.Owner:Alive() and self.Owner:GetActiveWeapon() == self and self:CanHolster() then
+			local wep = self:GetNewWeapon()
+			if IsValid(wep) then
+				self:SetHolstering(true)
+				if game.SinglePlayer() then
+					self.Owner:SelectWeapon(wep:GetClass())
+				elseif CLIENT and IsFirstTimePredicted() then
+					input.SelectWeapon(wep)
+				end
+			end
+		else
+			self:SetHolsterDelay(0)
+		end
+	end
+	
+	local attHolsterDelay = self:GetAttackHolsterDelay()
+	if attHolsterDelay > 0 and attHolsterDelay <= CurTime() then
+		self:SetAttackHolsterDelay(0)
+		local wep = self:GetNewWeapon()
+		if IsValid(wep) then
+			self:Holster(wep)
+		end
+	end
 	
 	local idle = self:GetIdleDelay()
 	if idle > 0 and CurTime() > idle then
@@ -326,6 +398,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 end
 
 function SWEP:ResetBonePositions()
+	if !IsValid(self) then return end
 	local vm = self.Owner:GetViewModel()
 	if (!vm:GetBoneCount()) then return end
 	--vm:SetupBones()

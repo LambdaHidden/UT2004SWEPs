@@ -21,6 +21,7 @@ end
 
 function SWEP:SpecialDT()
 	self:NetworkVar("Bool", 3, "Zoom")
+	self:NetworkVar("Entity", 1, "Puck")
 end
 
 function SWEP:SpecialInit()
@@ -71,16 +72,16 @@ function SWEP:PrimaryAttack()
 			phys:SetVelocity(ang:Forward() *1170)
 		end
 		--self.entTele = entTele
-		own:SetNWEntity("entTele", entTele)
+		self:SetPuck(entTele) --own:SetNW2Entity("entTele", entTele)
 		timer.Simple(.1, function() self:SetAttack(true) end)
 	else
-		local ent = own:GetNWEntity("entTele")
+		local ent = self:GetPuck()--own:GetNW2Entity("entTele")
 		--BSeekLost1
 		self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
 		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 		self:SetIdleDelay(CurTime() +.4)
 		
-		if IsValid(ent) and ent:Health() < 1 then self:WeaponSound("ut2004/weaponsounds/BSeekLost1.wav") return end
+		if IsValid(ent) and ent:Health() < 1 then self:WeaponSound("ut2004/weaponsounds/baseguntech/BSeekLost1.wav") return end
 		
 		self:SetAttack(false)
 		if self:GetZoom() then
@@ -98,7 +99,7 @@ function SWEP:SecondaryAttack()
 	if !self:GetAttack() then return end
 	local own = self:GetOwner()
 	
-	local ent = own:GetNWEntity("entTele")
+	local ent = self:GetPuck() --own:GetNW2Entity("entTele")
 	if IsValid(ent) then
 	
 		local startpos = ent:GetPos()
@@ -141,7 +142,7 @@ function SWEP:SecondaryAttack()
 			end
 		end
 		
-		self:CallOnClient("RenderTeleportEffects")
+		self:CallOnClient("RenderTeleportEffects", ent:EntIndex())
 		
 		if tr.HitNonWorld and tr.Entity != own then
 			tr.Entity:TakeDamage(999, own)
@@ -156,7 +157,7 @@ function SWEP:SecondaryAttack()
 		end
 
 		ent.pickup = nil
-		own:SetNWEntity("entTele", nil)
+		self:SetPuck(nil) --own:SetNW2Entity("entTele", nil)
 		ent:Remove()
 		if self:GetZoom() then
 			self:TogglePuckCamera()
@@ -168,7 +169,7 @@ function SWEP:SecondaryAttack()
 		self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
 		self:SetIdleDelay(CurTime() +.3)
 		self:SetAttack(false)
-		self:TakeAmmo()
+		self:TakeAmmo(1)
 		self.ReturnAmmoTime = CurTime() + 1.5
 		self:SetIdleDelay(CurTime() +.4)
 		
@@ -182,14 +183,17 @@ function SWEP:CanHolster()
 	return (!self.cantholster or self.cantholster <= CurTime())
 end
 
-function SWEP:RenderTeleportEffects()
+function SWEP:RenderTeleportEffects(puck)
 	local own = self:GetOwner()
 	if !IsValid(own) then return end
-	local ent = own:GetNWEntity("entTele")
+	
+	local ent = Entity(tonumber(puck))
 	
 	local glow = CreateParticleSystem(own, "ut2004_trans_glow", PATTACH_POINT_FOLLOW, 3)
 	glow:SetControlPoint(1, own:GetPlayerColor())
 	glow:StartEmission()
+	
+	own:SetNW2Float("Teleported", CurTime()+1)
 	
 	if !IsValid(ent) then return end
 	
@@ -198,18 +202,11 @@ function SWEP:RenderTeleportEffects()
 	tracers:SetControlPoint(1, ent:GetPos())
 	tracers:SetControlPoint(2, own:GetPlayerColor())
 	tracers:StartEmission()
-	
-	own:SetNWBool("Teleported", true)
-	timer.Simple(1, function() 
-		if IsValid(own) then
-			own:SetNWBool("Teleported", false)
-		end
-	end)
 end
 
 function SWEP:SpecialThink()
 	local own = self:GetOwner()
-	local ent = own:GetNWEntity("entTele")
+	local ent = self:GetPuck() --own:GetNW2Entity("entTele")
 	if self:GetAttack() and ent and !IsValid(ent) then
 		self:SetAttack(false)
 		self:SendWeaponAnim(ACT_VM_IDLE)
@@ -263,8 +260,8 @@ function SWEP:TogglePuckCamera()
 			own:SetViewEntity(own)
 			self:SetZoom(false)
 		else
-			if IsValid(own:GetNWEntity("entTele")) then
-				own:SetViewEntity(own:GetNWEntity("entTele"))
+			if IsValid(self:GetPuck()) then
+				own:SetViewEntity(self:GetPuck())
 				self:SetZoom(true)
 			end
 		end
@@ -282,10 +279,11 @@ function SWEP:OnRemove()
 	if CLIENT then return end
 		
 	local owner = self:GetOwner()
+	local ent = self:GetPuck()
 	if owner:IsValid() and owner:IsPlayer() and self:GetAttack() then
 		self:SetAttack(false)
-		if IsValid(owner:GetNWEntity("entTele")) then
-			owner:GetNWEntity("entTele"):Remove()
+		if IsValid(ent) then
+			ent:Remove()
 		end
 		if self:GetZoom() then
 			self:TogglePuckCamera()
@@ -302,35 +300,28 @@ end
 
 if CLIENT then
 
-local Edge = surface.GetTextureID("vgui/ut2004/TranslocatorCorner")
-local Interlace = surface.GetTextureID("vgui/ut2004/TranslocatorInterlace")
-local static = surface.GetTextureID("vgui/ut2004/static_a")
+local Interlace = surface.GetTextureID("ut2004/xgameshaders/zoomfx/TransCamFB")
+local static = surface.GetTextureID("ut2004/xgameshaders/zoomfx/ScreenNoiseFB")
 
 function SWEP:DrawHUD()
 	local x, y = ScrW() * 0.5, ScrH() * 0.5
-	local ent = self:GetOwner():GetNWEntity("entTele")
+	local ent = self:GetPuck() --self:GetOwner():GetNW2Entity("entTele")
 	
-	--if self:GetNWBool("DrawReticle") then
+	--if self:GetNW2Bool("DrawReticle") then
 		
-		surface.SetDrawColor(255, 255, 255, 255)
+		surface.SetDrawColor(255, 255, 255, 128)
 		
 		if IsValid(ent) and self:GetZoom() then
 			
-			if ent:Health() < 1 then
+			if ent:Health() <= 0 then
 				surface.SetTexture(static)
-				surface.SetDrawColor(255, 255, 255, 255)
 				surface.DrawTexturedRect(0, 0, ScrW(), ScrH())
 				return
 			end
 			
 			surface.SetTexture(Interlace)
-			surface.DrawTexturedRectUV( 0, 0, ScrW(), ScrH(), 0, 0, 1, 6 )
-			
-			surface.SetTexture(Edge)
-			surface.DrawTexturedRect(0, 0, x, y) --Top Left
-			surface.DrawTexturedRectUV( x, 0, x, y, 1, 0, 0, 1 ) --Top Right
-			surface.DrawTexturedRectUV( 0, y, x, y, 0, 1, 1, 0 ) --Bottom Left
-			surface.DrawTexturedRectUV( x, y, x, y, 1, 1, 0, 0 ) --Bottom Right
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() )
 		end
 	--end
 	
@@ -343,14 +334,14 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_translocator.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_translocator.mdl"
+SWEP.ViewModel			= "models/ut2004/newweapons2004/newtranslauncher_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/newweapons2004/newtranslauncher_3rd.mdl"
 
-SWEP.DeploySound 		= Sound("ut2004/weaponsounds/translocator_change.wav")
+SWEP.DeploySound 		= Sound("ut2004/weaponsounds/misc/translocator_change.wav")
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BTranslocatorFire.wav")
-SWEP.Primary.Special1		= Sound("ut2004/weaponsounds/BTranslocatorModuleRegeneration.wav")
-SWEP.Primary.Special2		= Sound("ut2004/weaponsounds/BWeaponSpawn1.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BTranslocatorFire.wav")
+SWEP.Primary.Special1		= Sound("ut2004/weaponsounds/baseguntech/BTranslocatorModuleRegeneration.wav")
+SWEP.Primary.Special2		= Sound("ut2004/weaponsounds/baseguntech/BWeaponSpawn1.wav")
 SWEP.Primary.Delay			= .3
 SWEP.Primary.Automatic	= false
 SWEP.Primary.Clip1 			= -1

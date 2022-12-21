@@ -27,7 +27,7 @@ function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
 	util.PrecacheSound(self.Secondary.Sound)
-	util.PrecacheSound("ut2004/weaponsounds/BExplosion1.wav")	
+	util.PrecacheSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion1.wav")	
 end
 
 function SWEP:Flak()	
@@ -101,7 +101,7 @@ end
 
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
@@ -111,10 +111,10 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_flak.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_flak.mdl"
+SWEP.ViewModel			= "models/ut2004/weapons/flak_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/weapons/flak_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BFlakCannonFire.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BFlakCannonFire.wav")
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.ClipSize		= -1
 SWEP.Primary.Delay			= 0.8
@@ -122,11 +122,11 @@ SWEP.Primary.DefaultClip	= 10
 SWEP.Primary.Automatic		= true
 SWEP.Primary.Ammo			= "ammo_flak_shells"
 
-SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/BFlakCannonAltFire.wav")
+SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/basefiringsounds/BFlakCannonAltFire.wav")
 SWEP.Secondary.Delay		= 1
 SWEP.Secondary.Automatic	= true
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToFlakCannon.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/flakcannon/SwitchToFlakCannon.wav")
 
 SWEP.MuzzleName				= "ut2004_mflash_flak"
 SWEP.LightForward			= 46

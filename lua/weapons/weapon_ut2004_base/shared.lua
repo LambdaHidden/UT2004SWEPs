@@ -2,10 +2,10 @@
 if SERVER then
 
 	AddCSLuaFile()
-	CreateConVar("ut2k4_restrictredeemer", 0, FVAR_NONE, "Restrict Redeemer")
+	CreateConVar("ut2k4_restrictsuperweps", 0, FCVAR_NOTIFY, "Restrict Superweapons")
 	CreateConVar("ut2k4_unlimitedammo", 0, FCVAR_NOTIFY, "Unlimited ammo for everyone")
-	CreateConVar("ut2k4_weaponsstay", 1, FCVAR_NOTIFY, "Weapons can always be picked up")
-	CreateConVar("ut2k4_shieldgun_impulse", 9, FVAR_NONE, "Force multiplier for Shield Gun boosted jumps")
+	CreateConVar("ut2k4_weaponsstay", 1, bit.bor(FCVAR_NOTIFY, FCVAR_ARCHIVE), "Weapons dont vanish when grabbed. Ammo only given the first time.")
+	CreateConVar("ut2k4_shieldgun_impulse", 9, bit.bor(FCVAR_NOTIFY, FCVAR_ARCHIVE), "Force multiplier for Shield Gun boosted jumps. Default is 9.")
 	
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
@@ -25,6 +25,7 @@ if CLIENT then
 	
 	CreateClientConVar("ut2k4_bobscale", 1)
 	CreateClientConVar("ut2k4_lighting", 1)
+	CreateClientConVar("ut2k4_shieldsound", 1)
 end
 
 SWEP.Author				= "Upset & Hidden"
@@ -88,8 +89,11 @@ function SWEP:OnRestore()
 end
 
 function SWEP:Deploy()
-	self:SetNextPrimaryFire(CurTime() +self.DelayBeforeShot)
-	self:SetNextSecondaryFire(CurTime() +self.DelayBeforeShot)
+	local preshottime = CurTime() + self.DelayBeforeShot
+	if self:GetNextPrimaryFire() < preshottime then
+		self:SetNextPrimaryFire(preshottime)
+		self:SetNextSecondaryFire(preshottime)
+	end
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:PlayDeploySound()
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
@@ -242,6 +246,8 @@ function SWEP:SpecialThink()
 end
 
 function SWEP:ShootBullet(dmg, recoil, numbul, cone, tracechance, tracename)
+	local own = self:GetOwner()
+	
 	numbul 	= numbul 	or 1
 	cone 	= cone 		or 0.01
 	tracechance = tracechance or 3
@@ -249,16 +255,16 @@ function SWEP:ShootBullet(dmg, recoil, numbul, cone, tracechance, tracename)
 
 	local bullet = {}
 	bullet.Num 		= numbul
-	bullet.Src 		= self:GetOwner():GetShootPos()
-	bullet.Dir 		= self:GetOwner():GetAimVector()
+	bullet.Src 		= own:GetShootPos()
+	bullet.Dir 		= own:GetAimVector()
 	bullet.Spread 	= Vector(cone, cone, 0)
 	bullet.Tracer	= tracechance
 	bullet.TracerName = tracename
 	bullet.Force	= 10
 	bullet.Damage	= dmg
 	
-	self:GetOwner():FireBullets(bullet)
-	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+	own:FireBullets(bullet)
+	own:SetAnimation(PLAYER_ATTACK1)
 end
 
 function SWEP:CanPrimaryAttack()
@@ -272,14 +278,14 @@ function SWEP:CanPrimaryAttack()
 	return true
 end
 
-function SWEP:TakeAmmo()
+function SWEP:TakeAmmo(count)
 	if !cvars.Bool("ut2k4_unlimitedammo") and !self:GetOwner():IsNPC() then
-		self:TakePrimaryAmmo(1)
+		self:TakePrimaryAmmo(count)
 	end
 end
-function SWEP:TakeAmmo2()
+function SWEP:TakeAmmo2(count)
 	if !cvars.Bool("ut2k4_unlimitedammo") and !self:GetOwner():IsNPC() then
-		self:TakeSecondaryAmmo(1)
+		self:TakeSecondaryAmmo(count)
 	end
 end
 
@@ -325,15 +331,14 @@ end
 
 if SERVER then return end
 
-local udamagemat2004 = Material("models/ushader")
+local udamagemat2004 = Material("ut2004/xgameshaders/playershaders/WeaponUDamageShader")
 
 function SWEP:WorldModelMaterial()	
+	self:DrawModel()
 	if self:GetOwner().UT2K4UDamage then
 		render.MaterialOverride(udamagemat2004)
 		self:DrawModel()
 		render.MaterialOverride(0)
-	else
-		self:DrawModel()
 	end
 end
 
@@ -355,6 +360,8 @@ local BobTimeLast = RealTime()
 local t = 1
 
 function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
+	if !IsValid(self) then return end
+	if !IsValid(self:GetOwner()) then return end
 	local reg = debug.getregistry()
 	local GetVelocity = reg.Entity.GetVelocity
 	local Length = reg.Vector.Length2D

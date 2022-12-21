@@ -54,19 +54,20 @@ end
 
 function SWEP:Grenade(force)	
 	if CLIENT then return end
+	local own = self:GetOwner()
+	
 	local ent = ents.Create("ut2004_grenade")
-	local pos = self:GetOwner():GetShootPos()
-	local ang = self:GetOwner():EyeAngles()
-	pos = pos +ang:Right() *7 +ang:Up() *-8
+	local pos = own:GetShootPos() +own:GetRight() *7 +own:GetUp() *-8
+	
 	ent:SetPos(pos)
-	ent:SetAngles(self:GetOwner():EyeAngles())
-	ent:SetOwner(self:GetOwner())
+	ent:SetAngles(own:EyeAngles())
+	ent:SetOwner(own)
 	ent:SetExplodeDelay(3)
 	ent:Spawn()
 	ent:Activate()
 	local phys = ent:GetPhysicsObject()
 	if IsValid(phys) then
-		local vel = ang:Forward() *force +ang:Up() *128
+		local vel = own:GetAimVector() *force +own:GetUp() *128
 		phys:ApplyForceCenter(vel)
 	end	
 end
@@ -76,7 +77,9 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:AttackStuff()
+	if SERVER then self:GetOwner():LagCompensation(true) end
 	self:ShootBullet(self.Primary.Damage, self.Primary.Recoil, 1, self.Primary.Cone, 0)
+	if SERVER then self:GetOwner():LagCompensation(false) end
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)	
 	self:WeaponSound(self.Primary.Sound)
 	self:SetIdleDelay(CurTime() + self:SequenceDuration())
@@ -98,14 +101,14 @@ end
 
 function SWEP:AttackStuff()	
 	self:Muzzleflash()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
 
 function SWEP:AttackStuff2()	
 	self:Muzzleflash()
-	self:TakeAmmo2()
+	self:TakeAmmo2(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 	
@@ -122,10 +125,10 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_assault.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_assault.mdl"
+SWEP.ViewModel			= "models/ut2004/newweapons2004/assaultrifle.mdl"
+SWEP.WorldModel			= "models/ut2004/newweapons2004/newassaultrifle_3rd.mdl"
 
-SWEP.Primary.Sound			= "UT2004_AR.Fire"
+SWEP.Primary.Sound			= "Weapon_UT2004.AR_Fire"
 SWEP.Primary.Damage			= 7
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.Cone			= .09
@@ -142,7 +145,7 @@ SWEP.Secondary.Ammo			= "SMG1_Grenade"
 SWEP.Secondary.DefaultClip	= 4
 SWEP.Secondary.ClipSize		= -1
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToAssaultRifle.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/assaultrifle/SwitchToAssaultRifle.wav")
 
 SWEP.MuzzleName				= ""
 SWEP.LightForward			= 40

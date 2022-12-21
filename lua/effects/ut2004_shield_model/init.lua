@@ -1,8 +1,9 @@
 function EFFECT:Init(data)
 	self.Owner = data:GetEntity()
 	if !IsValid(self.Owner) then self:Remove() return end
+	self:SetRenderBounds( Vector(-32, -32, -32), Vector(32, 32, 32))
 	--self:SetAngles(data:GetAngles())
-	self:SetModel("models/ut2004/effects/shieldgun_shield.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/shield.mdl")
 	self:SetPos(self.Owner:GetShootPos())
 	self:SetAngles(self.Owner:EyeAngles())
 	--self.Size = 0

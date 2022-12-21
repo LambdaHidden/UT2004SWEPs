@@ -1,7 +1,8 @@
-EFFECT.Mat1 = Material("ut2004/effects/shock_spheretex")
+EFFECT.Mat1 = Material("ut2004/xeffectmat/shock/shock_spheretex")
 --EFFECT.AutomaticFrameAdvance = true
 
 function EFFECT:Init(data)
+	self:SetRenderBounds( Vector(-64, -64, -64), Vector(64, 64, 64))
 	self.Pos = data:GetOrigin()
 	if cvars.Bool("ut2k4_lighting") then
 		local dynlight = DynamicLight(0)
@@ -35,7 +36,7 @@ end
 function EFFECT:Render()
 	
 	render.SetMaterial(self.Mat1)
-	render.DrawSphere( self:GetPos(), 16*self.Size2, 16, 8, Color( 255, 255, 255 ) )
+	render.DrawSphere( self:GetPos(), 16*self.Size2, 16, 8, color_white )
 	local matrix = Matrix()
 	matrix:SetTranslation(Vector(self.Time*2, self.Time*0.6, 0))
 	matrix:SetScale(Vector(0.5, 0.5 ,0))

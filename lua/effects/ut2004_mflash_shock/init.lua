@@ -1,7 +1,7 @@
 function EFFECT:Init(data)
 	if !IsValid(data:GetEntity()) then self:Remove() return end
 	
-	self:SetModel("models/ut2004/effects/shock_muzzleflash.mdl")
+	self:SetModel("models/ut2004/WeaponStaticMesh/ShockMuzFlash.mdl")
 	
 	self.Refract = 1
 	

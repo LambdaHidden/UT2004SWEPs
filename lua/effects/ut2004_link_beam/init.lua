@@ -19,7 +19,7 @@ function EFFECT:Think()
 	if IsValid(self.Wep.Link) then
 		self.Particle:SetControlPointEntity(1, self.Wep.Link)
 	else
-		self.Particle:SetControlPoint(1, self.Wep:GetNWVector("LinkHitPos"))
+		self.Particle:SetControlPoint(1, self.Wep:GetNW2Vector("LinkHitPos"))
 	end
 	
 	if !self.Ent:KeyDown(IN_ATTACK2) then

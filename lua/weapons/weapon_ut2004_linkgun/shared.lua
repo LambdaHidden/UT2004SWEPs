@@ -25,12 +25,16 @@ function SWEP:SpecialInit()
 	--self:SetHoldType(self.HoldType)
 	util.PrecacheSound(self.Primary.Sound)
 	util.PrecacheSound(self.Secondary.Sound)
-	self:GetOwner():SetNWInt("LinkGunLinks", 0)
 	self.Link = nil
+end
+
+function SWEP:Equip(ply)
+	ply:SetNW2Int("LinkGunLinks", 0)
 end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
+	local own = self:GetOwner()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SetNextSecondaryFire(CurTime() + self.Primary.Delay)
 	self:AttackStuff()
@@ -40,19 +44,18 @@ function SWEP:PrimaryAttack()
 	self:UDSound()
 	
 	if SERVER then
-		local pos = self:GetOwner():GetShootPos()
-		local ang = self:GetOwner():GetAimVector():Angle()
-		pos = pos +ang:Right() *math.random(4,8) +ang:Up() *math.random(0,-6)
+		local pos = own:GetShootPos()
+		pos = pos +own:GetRight() *math.random(4,8) +own:GetUp() *math.random(0,-6)
 		local ent = ents.Create("ut2004_link_proj")
-		ent:SetAngles(ang)
+		ent:SetAngles(own:EyeAngles())
 		ent:SetPos(pos)
-		ent:SetOwner(self:GetOwner())
-		ent.Links = self:GetOwner():GetNWInt("LinkGunLinks")
+		ent:SetOwner(own)
+		ent.Links = own:GetNW2Int("LinkGunLinks")
 		ent:Spawn()
 		ent:Activate()
 		local phys = ent:GetPhysicsObject()
 		if IsValid(phys) then
-			phys:SetVelocity(ang:Forward() *1000)
+			phys:SetVelocity(own:GetAimVector() *2000)
 		end
 	end
 end
@@ -77,7 +80,7 @@ function SWEP:SecondaryAttack()
 	self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
 	self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:DisableHolster(.08)
 end
 
@@ -102,10 +105,10 @@ function SWEP:Beam()
 			if tr.Entity:IsPlayer() and tr.Entity:Team() == self:GetOwner():Team() then
 				self.Link = tr.Entity
 				--table.insert(self.Link.LinkGunLinks, self:GetOwner())
-				self.Link:SetNWInt("LinkGunLinks", self.Link:GetNWInt("LinkGunLinks") + 1)
+				self.Link:SetNW2Int("LinkGunLinks", self.Link:GetNW2Int("LinkGunLinks") + 1)
 			else
 				local dmginfo = DamageInfo()
-				dmginfo:SetDamage(self.Secondary.Damage * (1 + self:GetOwner():GetNWInt("LinkGunLinks") * 1.5) * engine.TickInterval())
+				dmginfo:SetDamage(self.Secondary.Damage * (1 + self:GetOwner():GetNW2Int("LinkGunLinks") * 1.5) * engine.TickInterval())
 				dmginfo:SetDamageType(DMG_ENERGYBEAM)
 				dmginfo:SetAttacker(self:GetOwner())
 				dmginfo:SetInflictor(self)
@@ -121,8 +124,8 @@ function SWEP:Beam()
 	--local hit1, hit2 = tr.HitPos + tr.HitNormal, tr.HitPos - tr.HitNormal
 	--util.Decal("FadingScorch", hit1, hit2)
 	self.HitDist = math.Clamp(self.HitDist * 1.25, self.HitDistMin, self.HitDistMax)
-	self:SetNWFloat("HitDist", self.HitDist)
-	self:SetNWVector( "LinkHitPos", tr.HitPos )
+	self:SetNW2Float("HitDist", self.HitDist)
+	self:SetNW2Vector( "LinkHitPos", tr.HitPos )
 	
 	if !cvars.Bool("ut2k4_lighting") or !CLIENT then return end
 	local dynlight = DynamicLight(self:EntIndex())
@@ -156,7 +159,7 @@ function SWEP:SpecialThink()
 		
 		if self.Link != nil then
 			--table.RemoveByValue(self.Link.LinkGunLinks, self:GetOwner())
-			self.Link:SetNWInt("LinkGunLinks", self.Link:GetNWInt("LinkGunLinks") - 1)
+			self.Link:SetNW2Int("LinkGunLinks", self.Link:GetNW2Int("LinkGunLinks") - 1)
 			self.Link = nil
 		end
 		self:SendWeaponAnim(ACT_VM_IDLE)
@@ -170,7 +173,7 @@ end
 
 function SWEP:AttackStuff()	
 	self:MuzzleflashSprite()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	--self:UDSound()
 end
@@ -180,10 +183,10 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_linkgun.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_linkgun.mdl"
+SWEP.ViewModel			= "models/ut2004/newweapons2004/fatlinkgun.mdl"
+SWEP.WorldModel			= "models/ut2004/newweapons2004/newlinkgun_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/BPulseRifleFire.wav")
+SWEP.Primary.Sound			= Sound("ut2004/weaponsounds/basefiringsounds/BPulseRifleFire.wav")
 --SWEP.Primary.Special		= Sound("Weapon_UT99.PulseDown")
 SWEP.Primary.Recoil			= .2
 SWEP.Primary.ClipSize		= -1
@@ -193,7 +196,7 @@ SWEP.Primary.Automatic		= true
 SWEP.Primary.Ammo			= "ammo_pulse_cell"
 
 SWEP.Secondary.Damage		= 82.5
-SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/BLinkGunBeam1.wav")
+SWEP.Secondary.Sound		= Sound("ut2004/weaponsounds/linkgun/BLinkGunBeam1.wav")
 SWEP.Secondary.Delay		= .2
 SWEP.Secondary.Automatic	= true
 SWEP.Secondary.Cone			= 0

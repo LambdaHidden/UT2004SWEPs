@@ -15,7 +15,7 @@ if CLIENT then
 	SWEP.UTSlot				= 8
 	SWEP.Weight				= 11
 	SWEP.ViewModelFOV		= 45
-	SWEP.WepSelectIcon		= surface.GetTextureID( "vgui/ut2004/rocketlauncher" )
+	SWEP.WepSelectIcon		= surface.GetTextureID( "vgui/ut2004/avril" )
 	language.Add("ammo_avril_rockets", "Anti-vehicle Rockets")
 	--killicon.Add("ut99_rocket", "vgui/ut99/eight", Color(255, 80, 0, 255))
 	
@@ -57,20 +57,18 @@ end
 function SWEP:SecondaryAttack()
 	local own = self:GetOwner()
 	
-	local trace = util.TraceLine({
-		start = own:GetShootPos(),
-		endpos = own:GetShootPos() + own:GetAimVector() * self.SeekDistance,
-		filter = own
-	})
-
-	if !IsValid(trace.Entity) then
-		trace = util.TraceHull({
+	local tr = {
 		start = own:GetShootPos(),
 		endpos = own:GetShootPos() + own:GetAimVector() * self.SeekDistance,
 		filter = own,
 		mins = Vector(-16, -16, -16),
 		maxs = Vector(16, 16, 16)
-		})
+	}
+	
+	local trace = util.TraceLine(tr)
+
+	if !IsValid(trace.Entity) then
+		trace = util.TraceHull(tr)
 	end
 	
 	local target = trace.Entity
@@ -81,9 +79,9 @@ function SWEP:SecondaryAttack()
 			if self.seek and (CurTime() - self.seek) > 1 then
 				self.seek = CurTime() +0.25
 				--if game.SinglePlayer() and CLIENT or !game.SinglePlayer() then self:EmitSound("ut2004/weaponsounds/BLockOn1.wav") end
-				self:EmitSound("ut2004/weaponsounds/BLockOn1.wav")
+				self:EmitSound("ut2004/weaponsounds/baseguntech/BLockOn1.wav")
 				self.target = target
-				self:SetNWBool("seekcrosshair", true)
+				self:SetNW2Bool("seekcrosshair", true)
 			end		
 		end
 	end
@@ -98,14 +96,14 @@ function SWEP:SpecialThink()
 		self.seekDelay = nil
 		self.target = nil
 		--if game.SinglePlayer() and CLIENT or !game.SinglePlayer() then self:EmitSound("ut2004/weaponsounds/BSeekLost1.wav") end
-		self:EmitSound("ut2004/weaponsounds/BSeekLost1.wav")
-		self:SetNWBool("seekcrosshair", false)
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BSeekLost1.wav")
+		self:SetNW2Bool("seekcrosshair", false)
 	end
 end
 
 function SWEP:AttackStuff()	
 	self:MuzzleflashSprite()
-	self:TakeAmmo()
+	self:TakeAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:UDSound()
 end
@@ -138,11 +136,11 @@ SWEP.Base				= "weapon_ut2004_base"
 SWEP.Category			= "Unreal Tournament 2004"
 SWEP.Spawnable			= true
 
-SWEP.ViewModel			= "models/ut2004/weapons/v_avril.mdl"
-SWEP.WorldModel			= "models/ut2004/weapons/w_avril.mdl"
+SWEP.ViewModel			= "models/ut2004/onsweapons-a/avril_1st.mdl"
+SWEP.WorldModel			= "models/ut2004/onsweapons-a/avril_3rd.mdl"
 
-SWEP.Primary.Sound			= Sound("ut2004/onsvehiclesounds-s/AvrilFire01.wav")
-SWEP.Primary.Special		= Sound("ut2004/onsvehiclesounds-s/AvrilReload01.wav")
+SWEP.Primary.Sound			= Sound("ut2004/onsvehiclesounds-s/avril/AvrilFire01.wav")
+SWEP.Primary.Special		= Sound("ut2004/onsvehiclesounds-s/avril/AvrilReload01.wav")
 --SWEP.Primary.Special2		= Sound("weapons/ut99/BRocketLauncherLoad.wav")
 SWEP.Primary.Recoil			= .75
 SWEP.Primary.Delay			= 4.0
@@ -154,7 +152,7 @@ SWEP.Primary.Ammo			= "ammo_avril_rockets"
 SWEP.Secondary.Delay			= 0.2
 SWEP.Secondary.Automatic	= true
 
-SWEP.DeploySound			= Sound("ut2004/weaponsounds/SwitchToFlakCannon.wav")
+SWEP.DeploySound			= Sound("ut2004/weaponsounds/flakcannon/SwitchToFlakCannon.wav")
 SWEP.mode 					= "single"
 SWEP.SeekDistance			= 4096
 SWEP.MuzzleName				= "ut2004_mflash_flak"
