@@ -6,7 +6,6 @@ function ENT:SetupDataTables()
 end
 
 function ENT:Initialize()
-	ParticleEffectAttach( "ut2004_item_spawner", PATTACH_ABSORIGIN_FOLLOW, self, 0 )
 	self.Rotate = 0
 	self.RotateTime = CurTime()
 end
@@ -16,6 +15,6 @@ function ENT:Draw()
 		self:DrawModel()
 	end
 	
-	self.Rotate = (CurTime() - self.RotateTime)*160 %360
+	self.Rotate = (CurTime() - self.RotateTime)*20 %360
 	self:SetAngles(Angle(0,-self.Rotate,0))
 end

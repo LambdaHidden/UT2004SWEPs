@@ -1,5 +1,6 @@
 if (SERVER) then
 AddCSLuaFile( "shared.lua" )
+AddCSLuaFile( "cl_init.lua" )
 end
 
 ENT.Type			= "anim"
@@ -12,7 +13,7 @@ ENT.Instructions	= ""
 if SERVER then
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/grenade2.mdl")
+	self:SetModel("models/ut2004/vmweaponssm/playerweaponsgroup/vmgrenade.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
 	--self:PhysicsInitSphere(4, metal_bouncy)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -32,8 +33,13 @@ function ENT:Initialize()
 	timer.Create( self:EntIndex().."_beep", 2, 0, function() 
 		eff:SetEntity(self)
 		eff:SetOrigin(self:GetPos())
+		if self.Owner then
+			local plycol = self.Owner:GetPlayerColor()
+			local col = ColorToHSV(plycol:ToColor())
+			eff:SetColor(col)
+		end
 		util.Effect("ut2004_grenade_beep", eff)
-		self:EmitSound("ut2004/assaultsounds/TargetCycle01.wav", 60, 100)
+		self:EmitSound("ut2004/assaultsounds/HumanShip/TargetCycle01.wav", 60, 100)
 	end )
 end
 
@@ -47,7 +53,7 @@ function ENT:OnRemove()
 end
 
 function ENT:PhysicsCollide(data,phys)
-	local start = data.HitPos + data.HitNormal
+	--[[local start = data.HitPos + data.HitNormal
     local endpos = data.HitPos - data.HitNormal	
 	local trace = {}
 	trace.start = endpos
@@ -58,9 +64,11 @@ function ENT:PhysicsCollide(data,phys)
 	if tr.HitWorld then
 		self:SetOwner(nil)
 		self.Owner = self:GetVar("owner",Entity(1))
-	end
-	if self:GetVelocity():Length() > 200 then
-		self:EmitSound("ut2004/weaponsounds/BGrenfloor1.wav")
+	end]]
+	
+	--if self:GetVelocity():Length() > 200 then
+	if data.Speed > 200 then
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BGrenfloor1.wav")
 		phys:SetMaterial("metal_bouncy")
 	else
 		phys:SetMaterial("metal")
@@ -78,7 +86,7 @@ end
 function ENT:Explode()
 	--table.RemoveByValue(self.OwnerGun.Grenades, self)
 	util.BlastDamage(self, self.Owner, self:GetPos(), 150, 100)
-	self:EmitSound("ut2004/weaponsounds/BExplosion3.wav", 100, 100)
+	self:EmitSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion3.wav", 100, 100)
 	self:Remove()
 	
 	local spos = self:GetPos()

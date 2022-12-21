@@ -1,5 +1,5 @@
 ENT.Type = "anim"
-ENT.PrintName = "Armor Base"
+ENT.PrintName = "Powerup Base"
 ENT.Category = "Unreal Tournament"
 ENT.Author = "Hidden"
 ENT.Contact = ""

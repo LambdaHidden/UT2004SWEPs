@@ -4,12 +4,12 @@ AddCSLuaFile( "shared.lua" )
 include( 'shared.lua' )
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/rocket.mdl")
+	self:SetModel("models/ut2004/WeaponStaticMesh/RocketProj.mdl")
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_CUSTOM)
-
+	
 	local glow = ents.Create( "env_sprite" )
 	glow:SetKeyValue( "rendercolor","255 160 80" )
 	glow:SetKeyValue( "GlowProxySize","2.0" )
@@ -19,7 +19,7 @@ function ENT:Initialize()
 	glow:SetKeyValue( "renderamt","255" )
 	glow:SetKeyValue( "disablereceiveshadows","0" )
 	--glow:SetKeyValue( "model","sprites/blueflare1.spr" )
-	glow:SetKeyValue( "model","ut2004/effects/RocketFlare.vmt" )
+	glow:SetKeyValue( "model","ut2004/xeffects/RocketFlare.vmt" )
 	glow:SetKeyValue( "scale",".3" )
 	glow:Spawn()
 	glow:SetParent( self )
@@ -35,7 +35,7 @@ function ENT:Initialize()
 		phys:SetBuoyancyRatio(0)
 	end
 	
-	self.flysound = CreateSound(self, "ut2004/weaponsounds/RocketLauncherProjectile.wav")
+	self.flysound = CreateSound(self, "ut2004/weaponsounds/rocketlauncher/RocketLauncherProjectile.wav")
 	self.flysound:Play()
 
 	self:SetRemoveDelay(10)
@@ -66,7 +66,7 @@ function ENT:PhysicsCollide(data)
 	ParticleEffect( "ut2004_flak_explosion1", self:GetPos(), self:GetAngles() )
 
 	util.BlastDamage(self, self:GetOwner(), start, 150, 112)
-	self:EmitSound("ut2004/weaponsounds/BExplosion3.wav", 100, 100)
+	self:EmitSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion3.wav", 100, 100)
 	self:Remove()
 end
 

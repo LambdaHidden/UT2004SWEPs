@@ -3,15 +3,19 @@ AddCSLuaFile("shared.lua")
 include('shared.lua')
 
 ENT.PDuration = 27
-ENT.model = "models/ut2004/items/powerup_udamage.mdl"
+ENT.model = "models/ut2004/e_pickups/general/udamage.mdl"
 
 util.AddNetworkString("UT2K4UDamageMaterial")
 
+function ENT:StartTouch(ent)
+	
+end
 function ENT:Touch(ent)
-	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self.Available and !ent.UT2K4UDamage then
-		self.Available = false
-		self:SetNoDraw(true)
-		self.ReEnabled = CurTime() + 109
+	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self:GetAvailable() and !ent.UT2K4UDamage then
+		self:SetAvailable(false)
+		self:DrawShadow(false)
+		--self:SetNoDraw(true)
+		self.ReEnabled = CurTime() + 90 --109
 		
 		ent.UT2K4UDamage = true
 		ent.UT2K4UDamageTime = CurTime() + self.PDuration
@@ -39,7 +43,7 @@ hook.Add("PlayerTick", "UT2K4UDamageThink", function(ply)
 		
 		if math.Round(utime, 4) == 3 then
 			ply.UT2K4UDamageTimeOut = CurTime()
-			ply:EmitSound("ut2004/gamesounds/UDamageOut.wav")
+			ply:EmitSound("ut2004/pickupsounds/UDamageOut.wav")
 		end
 		
 		if utime <= 0 then

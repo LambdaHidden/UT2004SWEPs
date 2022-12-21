@@ -14,7 +14,7 @@ ENT.Instructions	= ""
 if SERVER then
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/flakchunk.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/flakchunk.mdl")
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	self:PhysicsInitSphere(2, "metal_bouncy")
 	self:SetMoveType(MOVETYPE_VPHYSICS)

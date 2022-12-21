@@ -1,7 +1,7 @@
 include('shared.lua')
 
 function ENT:Initialize()
-	ParticleEffectAttach( "ut2004_rocket_smoketrail", PATTACH_ABSORIGIN_FOLLOW, self, 0 )
+	ParticleEffectAttach( "ut2004_smoketrail_rocket", PATTACH_ABSORIGIN_FOLLOW, self, 0 )
 end
 
 function ENT:Draw()

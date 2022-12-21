@@ -1,9 +1,9 @@
-
+AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include('shared.lua')
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/link_proj.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/linkprojectile.mdl")
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	self:PhysicsInitSphere(8, "default")
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -30,7 +30,7 @@ end
 
 function ENT:PhysicsUpdate(phys)
 	if self:WaterLevel() > 2 then
-		if IsValid(phys) then phys:SetVelocity(self:GetAngles():Forward() *700) return end
+		if IsValid(phys) then phys:SetVelocity(self:GetForward() *700) return end
 	end
 end
 
@@ -56,9 +56,9 @@ function ENT:OnRemove()
 end
 
 function ENT:Think()
-	local phys = self:GetPhysicsObject()
-	local ang = self:GetAngles()
-	if IsValid(phys) then phys:SetVelocity(ang:Forward() *2000 +ang:Right() *-5) end
+	--local phys = self:GetPhysicsObject()
+	--local ang = self:GetAngles()
+	--if IsValid(phys) then phys:SetVelocity(ang:Forward() *2000 +ang:Right() *-5) end
 	
 	if !self.delayRemove || CurTime() < self.delayRemove then return end
 	self.delayRemove = nil

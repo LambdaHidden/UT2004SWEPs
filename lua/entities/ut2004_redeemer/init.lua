@@ -4,7 +4,7 @@ AddCSLuaFile( "shared.lua" )
 include( 'shared.lua' )
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/redeemer_proj.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/redeemermissile.mdl")
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -20,10 +20,11 @@ function ENT:Initialize()
 		phys:SetBuoyancyRatio(0)
 	end
 
-	self.flysound = CreateSound(self, "ut2004/weaponsounds/redeemer_flight.wav")
+	self.flysound = CreateSound(self, "ut2004/weaponsounds/misc/redeemer_flight.wav")
 	self.flysound:Play()
 
 	--self.Owner = self:GetVar("owner",Entity(1))
+	if SERVER then self:SetLagCompensated(true) end
 end
 
 function ENT:PhysicsCollide(data)
@@ -48,33 +49,12 @@ function ENT:Explode()
 	timer.Simple(0.75, function() 
 		util.Effect("ut2004_redeemer_exp", effectdata, true, true)
 	end)
-	self:EmitSound("ut2004/weaponsounds/redeemer_explosionsound.wav", 500, 100)
+	self:EmitSound("ut2004/weaponsounds/misc/redeemer_explosionsound.wav", 500)
 	self:Remove()
 	
 	local owner = self:GetOwner()
-	/*
-	local shake = ents.Create( "env_shake" )
-	shake:SetOwner( owner )
-	shake:SetPos( self:GetPos() )
-	shake:SetKeyValue( "amplitude", "50" )
-	shake:SetKeyValue( "radius", "2048" )
-	shake:SetKeyValue( "duration", "2" )
-	shake:SetKeyValue( "frequency", "255" )
-	shake:SetKeyValue( "spawnflags", "4" )
-	shake:Spawn()
-	shake:Activate()
-	shake:Fire( "StartShake", "", 0 )	
-	*/
 	
 	util.ScreenShake( self:GetPos(), 50, 255, 2, 2048 )
-	/*
-	local smokeeffect = ents.Create( "env_ar2explosion" )
-	smokeeffect:SetOwner( owner )
-	smokeeffect:SetPos( self:GetPos() )
-	smokeeffect:Spawn()
-	smokeeffect:Activate()
-	smokeeffect:Fire( "Explode", "", 0 )
-	*/
 	local explosion = ents.Create( "ut2004_redeemer_exp" )
 	explosion:SetOwner( owner )
 	explosion:SetPos( self:GetPos() )
@@ -90,7 +70,7 @@ function ENT:ExplodeHarmless()
 	timer.Simple(0.75, function() 
 		util.Effect("ut2004_redeemer_exp", effectdata, true, true)
 	end)
-	self:EmitSound("ut2004/weaponsounds/redeemer_explosionsound.wav", 500, 100)
+	self:EmitSound("ut2004/weaponsounds/misc/redeemer_explosionsound.wav", 500, 100)
 	self:Remove()
 	
 	util.ScreenShake( self:GetPos(), 50, 255, 2, 2048 )

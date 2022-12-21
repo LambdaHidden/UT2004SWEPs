@@ -1,6 +1,5 @@
-if (SERVER) then
 AddCSLuaFile( "shared.lua" )
-end
+AddCSLuaFile( "cl_init.lua" )
 
 ENT.Type			= "anim"
 ENT.PrintName		= "UT2004 Grenade"
@@ -12,7 +11,7 @@ ENT.Instructions	= ""
 if SERVER then
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/grenade.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/grenademesh.mdl")
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
@@ -34,7 +33,7 @@ function ENT:OnRemove()
 end
 
 function ENT:PhysicsCollide(data,phys)
-	local start = data.HitPos + data.HitNormal
+	--[[local start = data.HitPos + data.HitNormal
     local endpos = data.HitPos - data.HitNormal	
 	local trace = {}
 	trace.start = endpos
@@ -46,8 +45,15 @@ function ENT:PhysicsCollide(data,phys)
 		self:SetOwner(nil)
 		self.Owner = self:GetVar("owner",Entity(1))
 	end
-	if self:GetVelocity():Length() > 196 then
-		self:EmitSound("ut2004/weaponsounds/BGrenfloor1.wav")
+	
+	if data.HitEntity:IsWorld() then
+		self:SetOwner(nil)
+		self.Owner = self:GetVar("owner",Entity(1)) -- Why are we removing the reference to the owner?
+	end]]
+	
+	--if self:GetVelocity():Length() > 196 then
+	if data.Speed > 196 then
+		self:EmitSound("ut2004/weaponsounds/baseguntech/BGrenfloor1.wav")
 		phys:SetMaterial("metal_bouncy")
 	else
 		phys:SetMaterial("metal")
@@ -59,13 +65,13 @@ end
 
 function ENT:Think()
 	if !self.delayExplode || CurTime() < self.delayExplode then return end
-	//self.delayExplode = nil
+	--self.delayExplode = nil
 	self:Explode()
 end
 
 function ENT:Explode()
 	util.BlastDamage(self, self.Owner, self:GetPos(), 150, 70)
-	self:EmitSound("ut2004/weaponsounds/BExplosion3.wav", 100, 100)
+	self:EmitSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion3.wav", 100, 100)
 	self:Remove()
 	
 	local spos = self:GetPos()

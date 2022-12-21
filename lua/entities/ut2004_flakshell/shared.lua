@@ -1,5 +1,6 @@
 if SERVER then
 	AddCSLuaFile( "shared.lua" )
+	AddCSLuaFile( "cl_init.lua" )
 end
 
 ENT.Type			= "anim"
@@ -12,7 +13,7 @@ ENT.Instructions	= ""
 if SERVER then
 
 function ENT:Initialize()
-	self:SetModel("models/ut2004/projectiles/flakshell.mdl")
+	self:SetModel("models/ut2004/weaponstaticmesh/flakshell.mdl")
 	self:PhysicsInit( SOLID_VPHYSICS )
 	self:SetMoveType( MOVETYPE_VPHYSICS )
 	self:SetSolid( SOLID_VPHYSICS )
@@ -22,6 +23,10 @@ function ENT:Initialize()
 		phys:Wake()
 		phys:SetBuoyancyRatio(0)
 	end
+	
+	self.flysound = CreateSound(self, "ut2004/weaponsounds/baseprojectilesounds/BFlakCannonProjectile.wav")
+	self.flysound:Play()
+	
 	self.deployDelay = true
 	self.HasExploded = false
 end
@@ -41,6 +46,10 @@ function ENT:Think()
 	if self.deployDelay then
 		self.deployDelay = nil
 	end
+end
+
+function ENT:OnRemove()
+	if self.flysound then self.flysound:Stop() end
 end
 
 function ENT:DoChunk(force)
@@ -63,7 +72,7 @@ function ENT:Explode()
 	if self.HasExploded then return end
 	self.HasExploded = true
 	util.BlastDamage(self, self:GetOwner(), self:GetPos(), 120, 160)	
-	self:EmitSound("ut2004/weaponsounds/BExplosion1.wav", 100, 100)
+	self:EmitSound("ut2004/weaponsounds/baseimpactandexplosions/BExplosion1.wav", 100, 100)
 	
 	ParticleEffect( "ut2004_flak_explosion", self:GetPos(), self:GetAngles() )
 	local effectdata = EffectData()

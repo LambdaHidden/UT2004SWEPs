@@ -1,0 +1,9 @@
+ENT.Type 			= "anim"
+ENT.PrintName		= "Ion Sattelite"
+ENT.Category 		= "Unreal Tournament 2004"
+ENT.Author			= "Hidden"
+ENT.Purpose			= "If present, beams for the Ion Painter come from here, and line-of-sight checks too."
+ENT.Instructions	= "Spawn and place somewhere, usually in space maps."
+ENT.Spawnable		= true
+ENT.AdminOnly 		= true
+ENT.AdminSpawnable 	= true

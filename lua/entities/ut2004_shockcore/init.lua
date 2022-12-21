@@ -22,6 +22,8 @@ function ENT:Initialize()
 	end
 	self:SetRemoveDelay(10)
 	self.HasHit = false
+	
+	if SERVER then self:SetLagCompensated(true) end
 end
 
 function ENT:SetRemoveDelay(flDelay)
@@ -29,7 +31,7 @@ function ENT:SetRemoveDelay(flDelay)
 end
 
 function ENT:PhysicsUpdate(phys)
-	if phys:GetVelocity():Length() < 10 then
+	if phys:GetVelocity():LengthSqr() < 100 then
 		phys:EnableGravity(true)
 	end
 end
@@ -60,11 +62,12 @@ function ENT:PhysicsCollide(data)
 		util.BlastDamageInfo(dmginfo, data.HitPos + data.HitNormal, 70)
 	end
 
-	self:EmitSound("ut2004/weaponsounds/ShockRifleExplosion.wav", 75, 100)
+	self:EmitSound("ut2004/weaponsounds/shockrifle/ShockRifleExplosion.wav", 75, 100)
 	self:Remove()
 end
 
 function ENT:Think()
+	self:NextThink(CurTime())
 	if self.Combo then
 		--util.BlastDamage(self, self.Owner, self:GetPos(), 300, 200)
 		local dmginfo = DamageInfo()
@@ -77,7 +80,7 @@ function ENT:Think()
 		effectdata:SetAngles(self.Owner:EyeAngles() + Angle(-90,0,0))
 		util.Effect("ut2004_shock_combo", effectdata)
 		--util.Effect("ut99_asmd_wavering", effectdata)
-		self:EmitSound("ut2004/weaponsounds/ShockComboFire.wav", 120)
+		self:EmitSound("ut2004/weaponsounds/shockrifle/ShockComboFire.wav", 120)
 		self:Remove()
 		local spos = self:GetPos()
 		local trs = util.TraceLine({start=spos + Vector(0,0,64), endpos=spos + Vector(0,0,-64), filter=self})
@@ -87,6 +90,7 @@ function ENT:Think()
 	if !self.delayRemove || CurTime() < self.delayRemove then return end
 	self.delayRemove = nil
 	self:Remove()
+	return true
 end
 
 function ENT:OnTakeDamage(dmginfo)

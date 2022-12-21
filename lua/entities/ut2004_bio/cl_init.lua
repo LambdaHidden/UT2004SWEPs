@@ -1,7 +1,7 @@
 include('shared.lua')
 
 function ENT:Draw()
-	--self:SetupBones()
+	self:SetModelScale(self:GetDrawScale())
 	self:DrawModel()
 	
 	if !cvars.Bool("ut2k4_lighting") then return end
@@ -15,7 +15,7 @@ function ENT:Draw()
 		dynlight.Brightness = 2
 		dynlight.DieTime = CurTime()+.1
 end
-
+/*
 function ENT:IsTranslucent()
 	return true
-end
+end*/

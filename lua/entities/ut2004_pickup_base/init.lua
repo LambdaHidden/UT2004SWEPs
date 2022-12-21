@@ -2,6 +2,13 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include('shared.lua')
 
+ENT.RespawnTime = 25
+
+
+function ENT:SetupDataTables()
+	self:NetworkVar( "Bool", 0, "Available" )
+end
+
 function ENT:SpawnFunction(ply, tr)
 	if (!tr.Hit) then return end
 	local SpawnPos = tr.HitPos + tr.HitNormal * 32
@@ -19,7 +26,7 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetAngles(Angle(0,90,0))
 	self:DrawShadow(true)
-	self.Available = true
+	self:SetAvailable(true)
 	self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 	self:SetRenderMode(RENDERMODE_TRANSALPHA)
 	self:SetTrigger(true)
@@ -29,24 +36,29 @@ end
 function ENT:Think()
 	if self.ReEnabled and CurTime() >= self.ReEnabled then
 		self.ReEnabled = nil
-		self.Available = true
-		self:SetNoDraw(false)
-		self:EmitSound("ut2004/weaponsounds/BWeaponSpawn1.wav")
+		self:EmitSound("ut2004/weaponsounds/misc/item_respawn.wav")
+		ParticleEffect( "ut2004_item_respawn", self:WorldSpaceCenter(), Angle(0,0,0), self )
+		timer.Simple(0.5, function()
+			if IsValid(self) then
+				self:SetAvailable(true)
+				self:DrawShadow(true)
+			end
+		end)/*
 		local effectdata = EffectData()
 		effectdata:SetEntity(self)
 		effectdata:SetOrigin(self:GetPos())
-		util.Effect("propspawn", effectdata, true, true)
+		util.Effect("propspawn", effectdata, true, true)*/
 	end
 end
 
 function ENT:StartTouch(ent)
-	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self.Available then
+	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self:GetAvailable() then
 		local ammoCount = ent:GetAmmoCount(self.AmmoType)
 		local ammoGiven = false
 		
 		if !ent:HasWeapon(self.WeapName) then
 			ent:Give(self.WeapName)
-			if !self.ShouldVanish then
+			if not (self.ShouldVanish or !cvars.Bool("ut2k4_weaponsstay")) then
 				ent:EmitSound(self.PickupSound,85,100)
 			end
 			ammoCount = ent:GetAmmoCount(self.AmmoType)
@@ -57,9 +69,9 @@ function ENT:StartTouch(ent)
 		end
 		
 		if self.ShouldVanish or !cvars.Bool("ut2k4_weaponsstay") then
-			self.Available = false
-			self:SetNoDraw(true)
-			self.ReEnabled = CurTime() + 25
+			self:SetAvailable(false)
+			self:DrawShadow(false)
+			self.ReEnabled = CurTime() + self.RespawnTime
 			ent:EmitSound(self.PickupSound,85,100)
 			if !ammoGiven and ammoCount < self.MaxAmmo then
 				ent:SetAmmo(math.min(ammoCount + self.AmmoAmount, self.MaxAmmo), self.AmmoType)

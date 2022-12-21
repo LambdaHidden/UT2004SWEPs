@@ -1,7 +1,7 @@
 include('shared.lua')
 
 function ENT:Initialize()
-	ParticleEffectAttach( "ut2004_flak_smoketrail", PATTACH_ABSORIGIN_FOLLOW, self, 0 )
+	ParticleEffectAttach( "ut2004_smoketrail_flak", PATTACH_ABSORIGIN_FOLLOW, self, 0 )
 	
 	local Pos = self:GetPos()
 	
